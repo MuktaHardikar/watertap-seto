@@ -194,7 +194,7 @@ def build_trough_medtvc(
         #         >= pyunits.convert(med_tvc.thermal_power_requirement, to_units=pyunits.MW)
         #         )
 
-        m.fs.energy.lt_med_heat_demand_constr = Constraint(
+        m.fs.energy.med_tvc_heat_demand_constr = Constraint(
             expr=m.fs.treatment.costing.aggregate_flow_heat
             <= -1 * m.fs.energy.costing.aggregate_flow_heat
         )
