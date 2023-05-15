@@ -6,8 +6,7 @@ from pyomo.environ import (
     Block,
     Constraint
 )
-import re
-from pyomo.network import Port
+
 from idaes.core import FlowsheetBlock, UnitModelCostingBlock
 from watertap_contrib.seto.unit_models.surrogate import MEDTVCSurrogate
 
@@ -38,6 +37,21 @@ from watertap_contrib.seto.costing import (
     EnergyCosting,
     SETOSystemCosting,
 )
+import numpy as np
+
+def get_order(x):
+    exp = round(np.log10(x))-1
+    return exp
+
+def plot_sensitivity_results(x,y,z,xlabel,ylabel,zlabel):
+    fig, ax = plt.subplots(figsize=(3,2.5))
+    cp = ax.contourf(x,y,z)
+    cbar = plt.colorbar(cp)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    cbar.set_label(zlabel)
+    
+    return fig
 
 
 def build_trough_medtvc(
@@ -62,7 +76,7 @@ def build_trough_medtvc(
         m.fs.treatment.med_tvc = MEDTVCSurrogate(
                 property_package_liquid=m.fs.liquid_prop,
                 property_package_vapor=m.fs.vapor_prop,
-                number_effects= number_of_effects,  # assuming 12 effects by default
+                number_effects= number_of_effects,
                 )
 
 
@@ -81,15 +95,17 @@ def build_trough_medtvc(
         recovery_ratio = recovery_ratio * pyunits.dimensionless
         feed_flow = pyunits.convert(
                         (sys_capacity / recovery_ratio), to_units=pyunits.m**3 / pyunits.s
-                )  # feed volumetric flow rate [m3/s]
-        
+                )  
+
+        exp = get_order(value(feed_flow))
+        sf= 10**-(exp)        
 
         # Set scaling factors for mass flow rates
         m.fs.liquid_prop.set_default_scaling(
-                "flow_mass_phase_comp", 1e-2, index=("Liq", "H2O")
+                "flow_mass_phase_comp", 1e-3, index=("Liq", "H2O")
                 )
         m.fs.liquid_prop.set_default_scaling(
-                "flow_vol_phase", 1, index=("Liq", "H2O")
+                "flow_vol_phase", sf, index=("Liq", "H2O")
                 )
         m.fs.liquid_prop.set_default_scaling(
                 "flow_mass_phase_comp", 1e3, index=("Liq", "TDS")
@@ -98,14 +114,16 @@ def build_trough_medtvc(
                 "flow_mass_phase_comp", 1e-2, index=("Liq", "H2O")
                 )
         m.fs.vapor_prop.set_default_scaling(
-                "flow_mass_phase_comp", 1, index=("Vap", "H2O")
+                "flow_mass_phase_comp", 1e-2, index=("Vap", "H2O")
                 )
         
         # Set scaling factors and calculate state for feed
         
-        set_scaling_factor(feed.flow_vol_phase['Liq'],1e-4)
+        set_scaling_factor(feed.flow_mass_phase_comp['Liq', 'H2O'],sf)
+        set_scaling_factor(feed.flow_vol_phase['Liq'],1)
         set_scaling_factor(feed.conc_mass_phase_comp['Liq','TDS'],1e2)
-        set_scaling_factor(feed.temperature,1e-1)
+        set_scaling_factor(feed.mass_frac_phase_comp['Liq','TDS'],1e2)
+        set_scaling_factor(feed.temperature,1e-2)
         set_scaling_factor(feed.pressure,1e-5)
 
         med_tvc.feed_props.calculate_state(
@@ -137,11 +155,14 @@ def build_trough_medtvc(
         steam.flow_mass_phase_comp["Vap", "H2O"].unfix()
         steam.flow_mass_phase_comp["Liq", "H2O"].unfix()
 
+        sf = get_scaling_factor(steam.flow_mass_phase_comp["Vap", "H2O"])
+        set_scaling_factor(steam.flow_mass_phase_comp["Vap", "H2O"],sf)
+
 
         # Set scaling factors and calculate state for motive
 
-        set_scaling_factor(motive.pressure,1e-5)
-        set_scaling_factor(motive.pressure_sat,1e-5)
+        set_scaling_factor(motive.pressure,1e-6)
+        set_scaling_factor(motive.pressure_sat,1e-6)
 
         med_tvc.motive_steam_props.calculate_state(
                 var_args={
@@ -154,6 +175,10 @@ def build_trough_medtvc(
         # Release mass flow rate
         motive.flow_mass_phase_comp["Vap", "H2O"].unfix()
         motive.flow_mass_phase_comp["Liq", "H2O"].unfix()
+
+        sf = get_scaling_factor(motive.flow_mass_phase_comp["Vap", "H2O"])
+        set_scaling_factor(motive.flow_mass_phase_comp["Vap", "H2O"],sf)
+
 
         med_tvc.recovery_vol_phase[0, "Liq"].fix(recovery_ratio)
 
@@ -171,45 +196,91 @@ def build_trough_medtvc(
         m.fs.treatment.costing.add_LCOW(dist.flow_vol_phase["Liq"])
 
         med_tvc.initialize()
+
+        if add_trough:
         
-        # Add trough energy block
+                # Add trough energy block
 
-        m.fs.energy = Block()
-        m.fs.energy.trough = trough = TroughSurrogate()
-        trough.hours_storage.fix(hours_storage)
+                m.fs.energy = Block()
+                m.fs.energy.trough = trough = TroughSurrogate()
+                trough.hours_storage.fix(hours_storage)
 
-        # Add trough costing
-        m.fs.energy.costing = EnergyCosting()
-        m.fs.energy.trough.costing = UnitModelCostingBlock(
-        flowsheet_costing_block=m.fs.energy.costing
-        )
-        m.fs.energy.costing.factor_maintenance_labor_chemical.fix(0)
-        m.fs.energy.costing.factor_total_investment.fix(1)
-        m.fs.energy.costing.cost_process()
-        m.fs.energy.costing.add_LCOW(dist.flow_vol_phase["Liq"])
+                # Add trough costing
+                m.fs.energy.costing = EnergyCosting()
+                m.fs.energy.trough.costing = UnitModelCostingBlock(
+                flowsheet_costing_block=m.fs.energy.costing
+                )
+                m.fs.energy.costing.factor_maintenance_labor_chemical.fix(0)
+                m.fs.energy.costing.factor_total_investment.fix(1)
+                m.fs.energy.costing.cost_process()
+                m.fs.energy.costing.add_LCOW(dist.flow_vol_phase["Liq"])
 
-        # Linking constraint
-        # m.fs.energy.med_tvc_heat_demand_constr = Constraint(
-        #         expr=trough.heat_load
-        #         >= pyunits.convert(med_tvc.thermal_power_requirement, to_units=pyunits.MW)
-        #         )
 
-        m.fs.energy.med_tvc_heat_demand_constr = Constraint(
-            expr=m.fs.treatment.costing.aggregate_flow_heat
-            <= -1 * m.fs.energy.costing.aggregate_flow_heat
-        )
+                m.fs.energy.med_tvc_heat_demand_constr = Constraint(
+                expr=m.fs.treatment.costing.aggregate_flow_heat
+                <= -1 * m.fs.energy.costing.aggregate_flow_heat
+                )
 
-        set_scaling_factor(m.fs.energy.trough.heat_load, 1e-3)
-        set_scaling_factor(m.fs.energy.trough.heat_annual, 1e-6)
-        set_scaling_factor(m.fs.energy.trough.heat, 1e-1)
+                if (value(pyunits.convert(m.fs.treatment.med_tvc.thermal_power_requirement, to_units=pyunits.MW)))<100:
+                        sf = 1e-1*get_scaling_factor(m.fs.treatment.med_tvc.thermal_power_requirement)
+                        print('Range 1')
+                        if (value(pyunits.convert(m.fs.treatment.med_tvc.thermal_power_requirement, to_units=pyunits.MW)))<10:
+                                sf = 1e-2*get_scaling_factor(m.fs.treatment.med_tvc.thermal_power_requirement)
+                                print('Range 1.1')
+                else:
+                        sf = 1e-3*get_scaling_factor(m.fs.treatment.med_tvc.thermal_power_requirement)
+                        print('Range 2')
 
-        set_scaling_factor(m.fs.energy.trough.electricity_annual, 1e-6)
-        set_scaling_factor(m.fs.energy.trough.electricity, 1e-1)
+                number = (value(pyunits.convert(m.fs.treatment.med_tvc.thermal_power_requirement, to_units=pyunits.MW)))*365*24
+                exp = get_order(number)
+                sf1 = 10**-(exp)
+                print('Scaling',sf1)
+                
+                # m.fs.energy.trough.electricity_annual = 1e6
+                set_scaling_factor(m.fs.energy.trough.heat_load, sf)
+                set_scaling_factor(m.fs.energy.trough.heat_annual, sf1)
+                set_scaling_factor(m.fs.energy.trough.heat, sf)
 
-        # Add system costing 
-        m.fs.sys_costing = SETOSystemCosting()
-        m.fs.sys_costing.add_LCOW(dist.flow_vol_phase["Liq"])
+                set_scaling_factor(m.fs.energy.trough.electricity_annual, 1e-7)
+                # set_scaling_factor(m.fs.energy.trough.electricity)
 
-        calculate_scaling_factors(m)
+                # Add system costing 
+                m.fs.sys_costing = SETOSystemCosting()
+                m.fs.sys_costing.add_LCOW(dist.flow_vol_phase["Liq"])
+
+                calculate_scaling_factors(m)
 
         return m
+
+def run_trough_medtvc(input):
+        m = build_trough_medtvc( 
+                number_of_effects = input[0],
+                feed_salinity = input[1],
+                feed_temperature = input[2],
+                steam_temp = input[3],
+                motive_pressure = input[4],
+                sys_capacity = input[5],
+                recovery_ratio = input[6],
+                hours_storage = input[7],
+                add_trough = input[8])
+        
+        try:
+            solver = get_solver()
+            results = solver.solve(m)
+        except:
+            constraint_autoscale_large_jac(m)
+            solver = get_solver()
+            results = solver.solve(m)
+
+        print(f"DOF = {degrees_of_freedom(m)}")      
+        med_tvc_thermal_requirement = (
+                value(pyunits.convert(m.fs.treatment.med_tvc.thermal_power_requirement, to_units=pyunits.MW)))
+        print(med_tvc_thermal_requirement)
+        if add_trough:
+                return [m.fs.treatment.costing.LCOW(), m.fs.energy.costing.LCOW(),m.fs.sys_costing.LCOW(),
+                        med_tvc_thermal_requirement,m.fs.energy.trough.heat_load()]
+        else:
+                return m.fs.treatment.costing.LCOW()
+
+# if __name__ == 'main':
+        
