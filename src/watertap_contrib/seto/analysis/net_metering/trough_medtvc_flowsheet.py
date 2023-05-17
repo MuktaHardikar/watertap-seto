@@ -38,6 +38,7 @@ from watertap_contrib.seto.costing import (
     SETOSystemCosting,
 )
 import numpy as np
+import matplotlib.pyplot as plt
 
 def get_order(x):
     exp = round(np.log10(x))-1
@@ -196,6 +197,8 @@ def build_trough_medtvc(
         m.fs.treatment.costing.add_LCOW(dist.flow_vol_phase["Liq"])
 
         med_tvc.initialize()
+        solver = get_solver()
+        solver.solve(med_tvc)
 
         if add_trough:
         
@@ -223,18 +226,17 @@ def build_trough_medtvc(
 
                 if (value(pyunits.convert(m.fs.treatment.med_tvc.thermal_power_requirement, to_units=pyunits.MW)))<100:
                         sf = 1e-1*get_scaling_factor(m.fs.treatment.med_tvc.thermal_power_requirement)
-                        print('Range 1')
+
                         if (value(pyunits.convert(m.fs.treatment.med_tvc.thermal_power_requirement, to_units=pyunits.MW)))<10:
                                 sf = 1e-2*get_scaling_factor(m.fs.treatment.med_tvc.thermal_power_requirement)
-                                print('Range 1.1')
+
                 else:
                         sf = 1e-3*get_scaling_factor(m.fs.treatment.med_tvc.thermal_power_requirement)
-                        print('Range 2')
+
 
                 number = (value(pyunits.convert(m.fs.treatment.med_tvc.thermal_power_requirement, to_units=pyunits.MW)))*365*24
                 exp = get_order(number)
                 sf1 = 10**-(exp)
-                print('Scaling',sf1)
                 
                 # m.fs.energy.trough.electricity_annual = 1e6
                 set_scaling_factor(m.fs.energy.trough.heat_load, sf)
@@ -272,15 +274,41 @@ def run_trough_medtvc(input):
             solver = get_solver()
             results = solver.solve(m)
 
-        print(f"DOF = {degrees_of_freedom(m)}")      
+        display_results(m)
+        return m, results
+
+def display_results(m):
+        print('RESULTS')
+        print("System LCOW ($/m3):%3.4f"%(m.fs.sys_costing.LCOW()))
+        print("Treatment LCOW ($/m3):%3.4f"%(m.fs.treatment.costing.LCOW()))
+        print("Trough LCOW ($/m3):%3.4f"%(m.fs.energy.costing.LCOW()))
         med_tvc_thermal_requirement = (
                 value(pyunits.convert(m.fs.treatment.med_tvc.thermal_power_requirement, to_units=pyunits.MW)))
-        print(med_tvc_thermal_requirement)
-        if add_trough:
-                return [m.fs.treatment.costing.LCOW(), m.fs.energy.costing.LCOW(),m.fs.sys_costing.LCOW(),
-                        med_tvc_thermal_requirement,m.fs.energy.trough.heat_load()]
-        else:
-                return m.fs.treatment.costing.LCOW()
+        print("MED-TVC thermal requirement (MW): %5.5f"%(med_tvc_thermal_requirement))
+        print("Trough heat (MW):%5.5f"%(m.fs.energy.trough.heat_load()))
+        
+        
+def main():
+        feed_salinity = 30
+        number_of_effects = 12
+        motive_pressure = 35
+        sys_capacity = 50000
 
-# if __name__ == 'main':
+        feed_temperature = 25
+        steam_temp = 70
+        recovery_ratio = 0.3
+        hours_storage = 7
+        add_trough = 1
+
+        input_array = np.array([number_of_effects,feed_salinity,feed_temperature,steam_temp,
+                                motive_pressure,sys_capacity,recovery_ratio,hours_storage, add_trough])
+        
+        m,results = run_trough_medtvc(input_array)
+        
+        return m,results
+       
+if __name__ == '__main__':
+       m,results = main()
+       
+
         
