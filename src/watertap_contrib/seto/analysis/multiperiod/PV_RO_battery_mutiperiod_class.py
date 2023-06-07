@@ -59,13 +59,15 @@ def unfix_dof(m):
     return
 
 # PV surrogate output for 4 select days
-summer_pv_df = pd.read_csv('/Users/mhardika/Documents/SETO/summer_pv_2000kw.csv',index_col='time (h)')
-spring_pv_df = pd.read_csv('/Users/mhardika/Documents/SETO/spring_pv_2000kw.csv',index_col='time (h)')
-fall_pv_df = pd.read_csv('/Users/mhardika/Documents/SETO/fall_pv_2000kw.csv',index_col='time (h)')
-winter_pv_df = pd.read_csv('/Users/mhardika/Documents/SETO/winter_pv_2000kw.csv',index_col='time (h)')
+file_path = '/Users/mhardika/Documents/watertap_seto/watertap-seto/src/watertap_contrib/seto/analysis/multiperiod'
+
+summer_pv_df = pd.read_csv(file_path +'/data_files/summer_pv_2000kw.csv',index_col='time (h)')
+spring_pv_df = pd.read_csv(file_path +'/data_files/spring_pv_2000kw.csv',index_col='time (h)')
+fall_pv_df = pd.read_csv(file_path +'/data_files/fall_pv_2000kw.csv',index_col='time (h)')
+winter_pv_df = pd.read_csv(file_path +'/data_files/winter_pv_2000kw.csv',index_col='time (h)')
 
 # Arbitrary electricity costs
-elec_price_df = pd.read_csv('/Users/mhardika/Documents/SETO/elec_price.csv',index_col='time (h)')
+elec_price_df = pd.read_csv(file_path +'/data_files/elec_price.csv',index_col='time (h)')
 elec_price = np.array(elec_price_df['elec_price'].values)
 elec_price = np.append(elec_price,elec_price)
 elec_price = np.append(elec_price,elec_price)
