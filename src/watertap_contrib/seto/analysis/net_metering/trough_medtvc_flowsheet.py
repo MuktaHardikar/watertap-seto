@@ -223,28 +223,16 @@ def build_trough_medtvc(
                 expr=m.fs.treatment.costing.aggregate_flow_heat
                 <= -1 * m.fs.energy.costing.aggregate_flow_heat
                 )
-
-                if (value(pyunits.convert(m.fs.treatment.med_tvc.thermal_power_requirement, to_units=pyunits.MW)))<100:
-                        sf = 1e-1*get_scaling_factor(m.fs.treatment.med_tvc.thermal_power_requirement)
-
-                        if (value(pyunits.convert(m.fs.treatment.med_tvc.thermal_power_requirement, to_units=pyunits.MW)))<10:
-                                sf = 1e-2*get_scaling_factor(m.fs.treatment.med_tvc.thermal_power_requirement)
-
-                else:
-                        sf = 1e-3*get_scaling_factor(m.fs.treatment.med_tvc.thermal_power_requirement)
-
-
-                number = (value(pyunits.convert(m.fs.treatment.med_tvc.thermal_power_requirement, to_units=pyunits.MW)))*365*24
-                exp = get_order(number)
-                sf1 = 10**-(exp)
                 
                 # m.fs.energy.trough.electricity_annual = 1e6
-                set_scaling_factor(m.fs.energy.trough.heat_load, sf)
-                set_scaling_factor(m.fs.energy.trough.heat_annual, sf1)
-                set_scaling_factor(m.fs.energy.trough.heat, sf)
+                set_scaling_factor(m.fs.energy.trough.heat_load, 1e-7)
+                set_scaling_factor(m.fs.energy.trough.heat_annual, 1e-7)
+                set_scaling_factor(m.fs.energy.trough.heat, 1e-5)
 
                 set_scaling_factor(m.fs.energy.trough.electricity_annual, 1e-7)
                 # set_scaling_factor(m.fs.energy.trough.electricity)
+
+                trough.initialize_build()
 
                 # Add system costing 
                 m.fs.sys_costing = SETOSystemCosting()
