@@ -40,7 +40,7 @@ from watertap.costing.units.uv_aop import cost_uv_aop
 
 from watertap_contrib.seto.solar_models.zero_order import Photovoltaic
 from watertap_contrib.seto.costing.solar.photovoltaic import cost_pv
-from watertap_contrib.seto.solar_models.surrogate.trough import TroughSurrogate
+from watertap_contrib.seto.solar_models.surrogate.trough.trough_surrogate_DG import TroughSurrogate
 from watertap_contrib.seto.costing.solar.trough_surrogate import cost_trough_surrogate
 from watertap_contrib.seto.unit_models.surrogate import LTMEDSurrogate
 from watertap_contrib.seto.unit_models.surrogate import MEDTVCSurrogate

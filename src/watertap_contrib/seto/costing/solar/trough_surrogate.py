@@ -13,7 +13,7 @@ def build_trough_surrogate_cost_param_block(blk):
 
     blk.base_storage_hours = pyo.Param(
         mutable=True,
-        initialize=6,
+        initialize=0,
         units=pyo.units.hour,
         doc="Hours of storage that capital cost per capacity is based on",
     )
@@ -116,6 +116,7 @@ def cost_trough_surrogate(blk):
         trough.electricity,
         "electricity",
     )
+    
     blk.costing_package.cost_flow(
         -1 * trough.heat,
         "heat",

@@ -159,10 +159,12 @@ def run_model(modules, heat_load=None, hours_storage=None):
     variable_operating_cost = cash_model.value("variable_operating_cost")  # [$]
 
     return {
-        "annual_energy": annual_energy,  # [kWh] annual net thermal energy in year 1
+        # "annual_energy": annual_energy,  # [kWh] annual net thermal energy in year 1
+        "heat_annual": annual_energy,  # [kWh] annual net thermal energy in year 1
         "freeze_protection": freeze_protection,  # [kWht]
         "capacity_factor": capacity_factor,  # [%] capacity factor
-        "electrical_load": electrical_load,  # [kWhe]
+        # "electrical_load": electrical_load,  # [kWhe]
+        "electricity_annual": electrical_load,  # [kWhe]
         "lcoh": lcoh,  # [$/kWht] LCOH
         "capital_cost": capital_cost,  # [$]
         "fixed_operating_cost": fixed_operating_cost,  # [$]
@@ -260,8 +262,8 @@ if __name__ == "__main__":
     data = []
     # heat_loads =        np.arange(100, 1100, 100)
     # hours_storages =    np.arange(0, 27, 3)
-    heat_loads = np.arange(100, 1100, 25)  # [MWt]
-    hours_storages = np.arange(0, 27, 1)  # [hr]
+    heat_loads = np.arange(10, 210, 10)  # [MWt]
+    hours_storages = np.arange(0, 26, 1)  # [hr]
     # heat_loads =        np.arange(100, 300, 100)
     # hours_storages =    np.arange(0, 6, 3)
     arguments = list(product(heat_loads, hours_storages))
@@ -285,10 +287,12 @@ if __name__ == "__main__":
             df,
             df_results[
                 [
-                    "annual_energy",
+                    "heat_annual",
+                    # "annual_energy",
                     "freeze_protection",
                     "capacity_factor",
-                    "electrical_load",
+                    # "electrical_load",
+                    "electricity_annual",
                     "lcoh",
                     "capital_cost",
                     "fixed_operating_cost",
