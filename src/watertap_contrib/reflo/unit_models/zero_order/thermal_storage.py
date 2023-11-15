@@ -186,7 +186,7 @@ class ThermalEnergyStorageData(UnitModelBlockData):
         # Add Ports
         self.add_inlet_port(name='hx_inlet',block = self.control_volume)
         self.add_outlet_port(name='outlet',block = self.control_volume)
-        # self.add_inlet_port(name='process_inlet',block = self.control_volume)
+        self.add_inlet_port(name='process_inlet',block = self.control_volume)
         # self.add_outlet_port(name='process_outlet',block = self.control_volume)
 
         # From https://github.com/gmlc-dispatches/dispatches/blob/main/dispatches/properties/solarsalt_properties.py
@@ -307,9 +307,9 @@ class ThermalEnergyStorageData(UnitModelBlockData):
                  - b.control_volume.properties_out[t].enth_flow_phase['Liq']*b.dt)
                 #  - b.properties_outlet[t].enth_flow_phase['Liq']*b.dt)
 
-        @self.Constraint(self.flowsheet().config.time)
-        def eq_tes_temp_exit(b,t):
-            return b.tes_temp[t] == b.control_volume.properties_out[t].temperature
+        # @self.Constraint(self.flowsheet().config.time)
+        # def eq_tes_temp_exit(b,t):
+        #     return b.tes_temp[t] == b.control_volume.properties_out[t].temperature
 
         
     def initialize_build(
