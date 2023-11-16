@@ -16,6 +16,7 @@ Thermal Energy Storage Tank
 """
 
 # Import Pyomo libraries
+from copy import deepcopy
 from pyomo.common.config import ConfigBlock, ConfigValue, In
 
 from pyomo.environ import (
@@ -150,44 +151,56 @@ class ThermalEnergyStorageData(UnitModelBlockData):
     def build(self):
         super().build()
 
-        # Build control volume for TES
-        self.control_volume = ControlVolume0DBlock(
-            dynamic=False,
-            has_holdup=False,
-            property_package=self.config.property_package,
-            property_package_args=self.config.property_package_args,
+        # Add hx inlet block
+        tmp_dict = dict(**self.config.property_package_args)
+        tmp_dict["has_phase_equilibrium"] = False
+        tmp_dict["parameters"] = self.config.property_package
+        tmp_dict["defined_state"] = False  # block is not an inlet
+        self.hx_inlet_block = self.config.property_package.state_block_class(
+            self.flowsheet().config.time,
+            doc="Material properties of exit stream from the heat source",
+            **tmp_dict,
         )
 
-        self.control_volume.add_state_blocks(
-            has_phase_equilibrium=False
+        # Add hx outlet block
+        tmp_dict = dict(**self.config.property_package_args)
+        tmp_dict["has_phase_equilibrium"] = False
+        tmp_dict["parameters"] = self.config.property_package
+        tmp_dict["defined_state"] = False  # block is not an inlet
+        self.hx_outlet_block = self.config.property_package.state_block_class(
+            self.flowsheet().config.time,
+            doc="Material properties of stream exiting the TES back to the heat source",
+            **tmp_dict,
         )
 
-        self.control_volume.add_energy_balances(
-            balance_type=self.config.energy_balance_type,
-            has_heat_of_reaction= False,
-            has_heat_transfer=False,
+        
+        # Add process inlet block
+        tmp_dict = dict(**self.config.property_package_args)
+        tmp_dict["has_phase_equilibrium"] = False
+        tmp_dict["parameters"] = self.config.property_package
+        tmp_dict["defined_state"] = False  # block is not an inlet
+        self.process_inlet_block = self.config.property_package.state_block_class(
+            self.flowsheet().config.time,
+            doc="Material properties of exit stream from the heat source",
+            **tmp_dict,
         )
 
-        self.control_volume.add_momentum_balances(
-            balance_type=self.config.momentum_balance_type,
-            has_pressure_change=False,
+        # Add process outlet block
+        tmp_dict = dict(**self.config.property_package_args)
+        tmp_dict["has_phase_equilibrium"] = False
+        tmp_dict["parameters"] = self.config.property_package
+        tmp_dict["defined_state"] = False  # block is not an inlet
+        self.process_outlet_block = self.config.property_package.state_block_class(
+            self.flowsheet().config.time,
+            doc="Material properties of stream exiting the TES back to the heat source",
+            **tmp_dict,
         )
 
-        # # Add outlet block
-        # tmp_dict = dict(**self.config.property_package_args)
-        # tmp_dict["has_phase_equilibrium"] = False
-        # tmp_dict["parameters"] = self.config.property_package
-        # tmp_dict["defined_state"] = False  # block is not an inlet
-        # self.properties_outlet = self.config.property_package.state_block_class(
-        #     self.flowsheet().config.time,
-        #     doc="Material properties of permeate",
-        #     **tmp_dict,
-        # )
         # Add Ports
-        self.add_inlet_port(name='hx_inlet',block = self.control_volume)
-        self.add_outlet_port(name='outlet',block = self.control_volume)
-        self.add_inlet_port(name='process_inlet',block = self.control_volume)
-        # self.add_outlet_port(name='process_outlet',block = self.control_volume)
+        self.add_inlet_port(name='hx_inlet',block = self.hx_inlet_block)
+        self.add_outlet_port(name='hx_outlet',block = self.hx_outlet_block)
+        self.add_inlet_port(name='process_inlet',block = self.process_inlet_block)
+        self.add_outlet_port(name='process_outlet',block = self.process_outlet_block)
 
         # From https://github.com/gmlc-dispatches/dispatches/blob/main/dispatches/properties/solarsalt_properties.py
         # **** Requires Temperature in K
@@ -221,19 +234,19 @@ class ThermalEnergyStorageData(UnitModelBlockData):
             doc="Volume of the thermal storage tank",
         )
 
-        # self.heat_in = Var(
-        #     self.flowsheet().config.time,
-        #     initialize=0,
-        #     units=pyunits.kW,
-        #     doc="Thermal energy from a solar power source",
-        # )
+        self.heat_in = Var(
+            self.flowsheet().config.time,
+            initialize=0,
+            units=pyunits.W,
+            doc="Thermal energy from a solar power source",
+        )
 
-        # self.heat_out = Var(
-        #     self.flowsheet().config.time,
-        #     initialize=0,
-        #     units=pyunits.kW,
-        #     doc="Thermal energy exiting the thermal storage tank",
-        # )
+        self.heat_out = Var(
+            self.flowsheet().config.time,
+            initialize=0,
+            units=pyunits.W,
+            doc="Thermal energy exiting the thermal storage tank",
+        )
 
         self.tes_initial_temp = Var(
             initialize=30+273.15,
@@ -291,25 +304,28 @@ class ThermalEnergyStorageData(UnitModelBlockData):
         def eq_salt_mass(b):
             return b.salt_mass == b.tes_volume * b.salt_packing_density
 
-        # # the temperature of the tank after each time step
-        # @self.Constraint(self.flowsheet().config.time)
-        # def eq_tes_temp(b, t):
-        #     return b.tes_temp[t] == b.tes_initial_temp + 1 / (
-        #         b.salt_csp * b.salt_mass
-        #     ) * (b.heat_in[t]*b.dt - b.heat_out[t]*b.dt)
-    
+        # Constraint to calculate the total heat entering
+        @self.Constraint(self.flowsheet().config.time)
+        def eq_heat_in(b,t):
+            return b.heat_in[t] == (
+                b.hx_inlet_block[t].enth_flow_phase['Liq']+
+                b.process_inlet_block[t].enth_flow_phase['Liq']
+            )
+                
+        # Constraint to calculate the total heat entering
+        @self.Constraint(self.flowsheet().config.time)
+        def eq_heat_out(b,t):
+            return b.heat_out[t] == (
+                b.hx_outlet_block[t].enth_flow_phase['Liq']+
+                b.process_outlet_block[t].enth_flow_phase['Liq']
+            )
+
         # the temperature of the tank after each time step
         @self.Constraint(self.flowsheet().config.time)
         def eq_tes_temp(b, t):
             return b.tes_temp[t] == b.tes_initial_temp + 1 / (
                 b.salt_csp * b.salt_mass
-            ) * (b.control_volume.properties_in[t].enth_flow_phase['Liq']*b.dt 
-                 - b.control_volume.properties_out[t].enth_flow_phase['Liq']*b.dt)
-                #  - b.properties_outlet[t].enth_flow_phase['Liq']*b.dt)
-
-        # @self.Constraint(self.flowsheet().config.time)
-        # def eq_tes_temp_exit(b,t):
-        #     return b.tes_temp[t] == b.control_volume.properties_out[t].temperature
+            ) * (b.heat_in[t]*b.dt - b.heat_out[t]*b.dt)
 
         
     def initialize_build(
@@ -325,13 +341,18 @@ class ThermalEnergyStorageData(UnitModelBlockData):
         solve_log = idaeslog.getSolveLogger(self.name, outlvl, tag="properties")
 
         # Create solver
-        opt = get_solver(solver=solver, options=optarg)
-
-        # set state_args from inlet state
+        opt = get_solver(solver=solver, options=optarg)    
+                
+        self.hx_inlet_block.initialize(
+            outlvl=outlvl,
+            optarg=optarg,
+            solver=solver,
+            state_args=state_args,
+        )
 
         if state_args is None:
-            state_args = {}
-            state_dict = self.control_volume.properties_in[
+            self.state_args = state_args = {}
+            state_dict = self.hx_inlet_block[
                 self.flowsheet().config.time.first()
             ].define_port_members()
 
@@ -343,26 +364,37 @@ class ThermalEnergyStorageData(UnitModelBlockData):
                 else:
                     state_args[k] = state_dict[k].value
 
-        # initialize control volume
-        flags = self.control_volume.initialize(
+        state_args_out = deepcopy(state_args)
+
+        self.hx_outlet_block.initialize(
             outlvl=outlvl,
             optarg=optarg,
             solver=solver,
-            state_args=state_args,
+            state_args=state_args_out,
         )
 
-        init_log.info_high("Initialization Step 1 Complete.")
+        self.process_inlet_block.initialize(
+            outlvl=outlvl,
+            optarg=optarg,
+            solver=solver,
+            state_args=state_args_out,
+        )
 
-         # solve unit
+        self.process_outlet_block.initialize(
+            outlvl=outlvl,
+            optarg=optarg,
+            solver=solver,
+            state_args=state_args_out,
+        )
+
+
+        # solve unit
         with idaeslog.solver_log(solve_log, idaeslog.DEBUG) as slc:
             res = opt.solve(self, tee=slc.tee)
         init_log.info(
             "TES initialization status {}.".format(idaeslog.condition(res))
         )
 
-        # release inlet state
 
-        self.control_volume.release_state(flags, outlvl + 1)
-        init_log.info("Initialization Complete: {}".format(idaeslog.condition(res)))
 
 
