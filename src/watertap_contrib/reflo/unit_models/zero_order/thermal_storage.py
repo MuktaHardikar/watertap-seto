@@ -155,7 +155,7 @@ class ThermalEnergyStorageData(UnitModelBlockData):
         tmp_dict = dict(**self.config.property_package_args)
         tmp_dict["has_phase_equilibrium"] = False
         tmp_dict["parameters"] = self.config.property_package
-        tmp_dict["defined_state"] = False  # block is not an inlet
+        tmp_dict["defined_state"] = True  
         self.hx_inlet_block = self.config.property_package.state_block_class(
             self.flowsheet().config.time,
             doc="Material properties of exit stream from the heat source",
@@ -173,12 +173,11 @@ class ThermalEnergyStorageData(UnitModelBlockData):
             **tmp_dict,
         )
 
-        
         # Add process inlet block
         tmp_dict = dict(**self.config.property_package_args)
         tmp_dict["has_phase_equilibrium"] = False
         tmp_dict["parameters"] = self.config.property_package
-        tmp_dict["defined_state"] = False  # block is not an inlet
+        tmp_dict["defined_state"] = True 
         self.process_inlet_block = self.config.property_package.state_block_class(
             self.flowsheet().config.time,
             doc="Material properties of exit stream from the heat source",
@@ -308,16 +307,16 @@ class ThermalEnergyStorageData(UnitModelBlockData):
         @self.Constraint(self.flowsheet().config.time)
         def eq_heat_in(b,t):
             return b.heat_in[t] == (
-                b.hx_inlet_block[t].enth_flow_phase['Liq']+
-                b.process_inlet_block[t].enth_flow_phase['Liq']
+                b.hx_inlet_block[t].enth_flow_phase['Liq']
+                + b.process_inlet_block[t].enth_flow_phase['Liq']
             )
                 
         # Constraint to calculate the total heat entering
         @self.Constraint(self.flowsheet().config.time)
         def eq_heat_out(b,t):
             return b.heat_out[t] == (
-                b.hx_outlet_block[t].enth_flow_phase['Liq']+
-                b.process_outlet_block[t].enth_flow_phase['Liq']
+                b.hx_outlet_block[t].enth_flow_phase['Liq']
+                + b.process_outlet_block[t].enth_flow_phase['Liq']
             )
 
         # the temperature of the tank after each time step
@@ -386,7 +385,6 @@ class ThermalEnergyStorageData(UnitModelBlockData):
             solver=solver,
             state_args=state_args_out,
         )
-
 
         # solve unit
         with idaeslog.solver_log(solve_log, idaeslog.DEBUG) as slc:
