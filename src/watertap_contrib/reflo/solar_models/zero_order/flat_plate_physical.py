@@ -278,7 +278,7 @@ class FlatPlatePhysicalData(SolarEnergyBaseData):
         
         @self.Constraint(self.flowsheet().config.time, 
                          doc='Constraint to calculate the outlet temperature from FPC')
-        def outlet_temp(b,t):
+        def eq_outlet_temp(b,t):
             return  b.outlet_block[t].temperature == (
                 # b.inlet_block[t].temperature + b.Q_useful[t]/b.mdot/b.cp_use
                 b.inlet_block[t].temperature + 

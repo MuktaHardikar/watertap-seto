@@ -196,10 +196,10 @@ class ThermalEnergyStorageData(UnitModelBlockData):
         )
 
         # Add Ports
-        self.add_inlet_port(name='hx_inlet',block = self.hx_inlet_block)
-        self.add_outlet_port(name='hx_outlet',block = self.hx_outlet_block)
-        self.add_inlet_port(name='process_inlet',block = self.process_inlet_block)
-        self.add_outlet_port(name='process_outlet',block = self.process_outlet_block)
+        self.add_inlet_port(name='tes_hx_inlet',block = self.hx_inlet_block)
+        self.add_outlet_port(name='tes_hx_outlet',block = self.hx_outlet_block)
+        self.add_inlet_port(name='tes_process_inlet',block = self.process_inlet_block)
+        self.add_outlet_port(name='tes_process_outlet',block = self.process_outlet_block)
 
         # From https://github.com/gmlc-dispatches/dispatches/blob/main/dispatches/properties/solarsalt_properties.py
         # **** Requires Temperature in K
