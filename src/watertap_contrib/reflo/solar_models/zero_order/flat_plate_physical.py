@@ -142,7 +142,7 @@ class FlatPlatePhysicalData(SolarEnergyBaseData):
         self._tech_type = "flat_plate"
 
         # ==========PARAMETERS==========
-        self.area_coll = Param(
+        self.area_coll = Var(
             initialize=1, units=pyunits.m**2, doc="area of a single collector"
         )
 
