@@ -221,11 +221,15 @@ class ThermalEnergyStorageData(UnitModelBlockData):
             doc="Diameter of the thermal storage tank"
         )
 
-        self.tes_height = Var(
-            initialize=10, 
-            units=pyunits.m, 
-            doc="Height of the thermal storage tank"
+        self.tes_H_D_ratio = Param(
+            initialize = 2,
+            doc='Height to diameter ratio of tank'
         )
+        # self.tes_height = Var(
+        #     initialize=10, 
+        #     units=pyunits.m, 
+        #     doc="Height of the thermal storage tank"
+        # )
 
         self.tes_volume = Var(
             initialize=100,
@@ -294,10 +298,10 @@ class ThermalEnergyStorageData(UnitModelBlockData):
         )
 
         # constraints
-        # tank volume
+        # tank volume- Update to have a ratio between height and diameter so that volume is optimized
         @self.Constraint(doc="Calculate optimal tank size")
         def eq_tes_volume(b):
-            return b.tes_volume == b.tes_height * 3.14 * b.tes_diameter**2 / 4
+            return b.tes_volume == b.tes_diameter*b.tes_H_D_ratio * 3.14 * b.tes_diameter**2 / 4
 
         @self.Constraint(doc="Calculate mass of solar salt")
         def eq_salt_mass(b):
