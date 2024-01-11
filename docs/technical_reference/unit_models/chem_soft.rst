@@ -1,7 +1,7 @@
 Chemical Softening
 ====================================================
-
-This chemical softening unit model
+This chemical softening unit model calculates the chemical dose required for target removal of hardness causing components. 
+The model also calculates the size the mixer, flocculator, sedimentation basin and the recarbonation basin. This chemical softening model
    * supports steady-state only
    * predicts the outlet concentration of Ca2+ and Mg2+
    * is verified against literature data
@@ -12,12 +12,12 @@ The model requires 2 configuration inputs
    * Softening procedure: ``single_stage_lime``, ``excess_lime``, ``single_stage_lime_soda``, ``excess_lime_soda``
    * Silica removal: ``True``, ``False``
 
-Degrees of Freedom
+Degrees of Freedom/Variables
 ------------------
-The chemical softening model has 17 degrees of freedom that should be fixed for the unit to be fully specified. 
+The chemical softening model has 18 degrees of freedom that should be fixed for the unit to be fully specified. 
 Additionally, depending on the chemical softening process selected, chemical dosing may or may not be required to be fixed.
 
-Typically, the following 6 variables define the input feed.
+Typically, the following 7 variables define the input feed.
 
 .. csv-table::
    :header: "Variables", "Variable Name",  "Unit"
@@ -61,7 +61,6 @@ The softening procedure where the doses are calculated in are listed in the tabl
 
 Model Structure
 ---------------
-
 This chemical softening model consists of 3 StateBlocks (as 3 Ports in parenthesis below).
 
 * Inlet (inlet)
@@ -72,7 +71,6 @@ The softening procedure type and whether or not silica removal is desired is set
 
 Sets
 ----
-
 The components Ca2+, Mg2+ and Alkalinity_2- must be included in the components.
 
 .. csv-table::
@@ -82,11 +80,9 @@ The components Ca2+, Mg2+ and Alkalinity_2- must be included in the components.
    "Phases", ":math:`p`", "['Liq', 'Vap']"
    "Components", ":math:`j`", "['H2O', 'Ca_2+', ' Mg_2+', 'Alkalinity_2-']"
 
-
-Variables
+Parameters
 ---------
-
-The following variables are calculated by fixing the default degree of freedoms above. 
+The following parameters are used as default values and are not mutable. 
 
 .. csv-table::
    :header: "Description", "Variable Name"
@@ -96,10 +92,11 @@ The following variables are calculated by fixing the default degree of freedoms 
    "Sludge produced per kg Mg in CaCO3 hardness", "Mg_hardness_CaCO3_sludge_factor"
    "Sludge produced per kg Mg in non-CaCO3 hardness", "Mg_hardness_nonCaCO3_sludge_prod_factor"
    "Multiplication factor to calculate excess CaO", "excess_CaO_coeff"
-   
+
+
 Equations
 ---------
-The chemical dose is calculated based on the type of softening procedure selected
+The chemical dose is calculated based on the type of softening procedure selected in the configuration of the flowsheet.
 
 .. csv-table:: Single Stage Lime
    :header: "Description", "Equation"
@@ -152,9 +149,40 @@ The following equations are independent of the softening procedure selected but 
    "Volume of sedimentation basin", "properties_in[0].flow_vol_phase['Liq'] * retention_time_sed"
    "Volume of recarbonation basin", "properties_in[0].flow_vol_phase['Liq'] * retention_time_recarb"
 
+Costing
+---------
+The following table lists out the coefficients used in the equations to calculate the capital and operating costs
+for the mixer, flocculator, sedimentation basin and recarbonation basin. The coefficients are assigned as mutable Parameters.
+
+.. csv-table::
+   :header: "Unit", "Symbol", "_constant", "_coeff/_coeff_1", "_coeff_2","_coeff_3","_exp/_exp_1","_exp_2"
+
+   "Mixer", "mix_tank_capital", "28584", "0.0002","22.776","", "2", "" 
+   "Flocculator", "floc_tank_capital", "217222", "673894", "", "", "", ""
+   "Sedimentation Basin", "sed_basin_capital", "182801", "-0.0005", "86.89", "", "2", ""
+   "Recarbonation Basin", "recarb_basin_capital", "19287", "4e-9", "-0.0002", "10.027", "3", "2"
+   "Recarbonation Basin Source", "recarb_basin_source_capital", "130812", "9e-8", "-0.001", "42.578", "", "2"
+   "Lime Feed System", "lime_feed_system_capital", "193268", "20.065", "", "", "", ""
+   "Administrative Capital", "floc_tank_capital", "", "", "", "", "", ""
+   "Mixer", "mix_tank_capital", "28584", "0.0002","22.776","", "2", "" 
+   "Flocculator", "floc_tank_capital", "", "", "", "", "", ""
+   "Sedimentation Basin", "floc_tank_capital", "", "", "", "", "", ""
+   "Recarbonation Basin", "floc_tank_capital", "", "", "", "", "", ""
+
+The following equations are used to calculate the capital and operating costs for the mixer, flocculator, sedimentation basin and recarbonation basin units
+and other costs.
+
+.. csv-table::
+   :header: "Unit", "Symbol", "Equation"
+
+
+The following equations are used to calculate the power consumption by the mixer and the flocculator used to calculate total electricity consumption
+
+.. csv-table::
+   :header: "Unit", "Symbol", "Equation"
+
 References
 ----------
-
 [1]  Crittenden, J. C., & Montgomery Watson Harza (Firm). (2012). Water treatment principles and design. Hoboken, N.J: J.Wiley.
 
 [2]  Davis, M. L. (2010). Water and wastewater engineering: Design principles and practice.
