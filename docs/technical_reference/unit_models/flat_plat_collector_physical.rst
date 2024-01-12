@@ -7,19 +7,26 @@ The following model uses physical equations to predict the useful heat generated
 
 Degrees of Freedom/Variables
 ------------------
-The model has 6 degrees of freedom that should be fixed for the unit to be fully specified.
+The model has  degrees of freedom that should be fixed for the unit to be fully specified.
 
-Typically, the following 5 variables define the input feed.
+Typically, the following 5 variables define the input stream and the output composition.
 
 .. csv-table::
-   :header: "Variables", "Variable name", "Symbol", "Valid range", "Unit"
+   :header: "Variables", "Variable name", "Symbol", "Unit"
 
-   "Feed salinity", "feed_props.conc_mass_phase_comp['Liq', 'TDS']", ":math:`X_{f}`", "30 - 60", ":math:`\text{g/}\text{L}`"
-   "Feed temperature", "feed_props.temperature", ":math:`T_{f}`", "15 - 35", ":math:`^o\text{C}`"
-   "Heating steam temperature", "steam_props.temperature", ":math:`T_{s}`", "60 - 85", ":math:`^o\text{C}`"
-   "Recovery ratio", "recovery_vol_phase['Liq']", ":math:`RR`", "0.3 - 0.5", ":math:`\text{dimensionless}`"
-   "Feed volume flow rate", "feed_props.flow_vol_phase['Liq']", ":math:`v_{f}`", "", ":math:`\text{m}^3 / \text{s}`"
-   
+   "Inlet volume flow rate", "``inlet.flow_mass_phase_comp['Liq','H2O']``", ":math:`m_{l}`", ":math:`\text{m}^3 / \text{s}`"
+   "Inlet volume flow rate", "``inlet.flow_mass_phase_comp['Vap','H2O']``", ":math:`m_{v}`", ":math:`\text{m}^3 / \text{s}`"
+   "Inlet temperature", "``inlet.temperature``", ":math:`T_{f}`", ":math:`\text{K}`"
+   "Inlet pressure", "``inlet.pressure``", "", ":math:`\text{Pa}`"
+   "Outlet pressure", "``inlet.pressure``", " ",  ":math:`\text{Pa}`"
+
+The following variables must be fixed by the user for a fully defined model.
+
+.. csv-table::
+   :header: "Variables", "Variable name", "Symbol", "Unit"
+   "Collector area", "``collector_area``", ":math:`A_{c}`",  ":math:`\text{m}^2`"
+   "Total irradiance", "``G_total``", ":math:`G_{total}`",  ":math:`\text{W}/\text{m}^2`"
+
 
 Model Structure
 ---------------
@@ -42,43 +49,46 @@ The model consists of the phase set included in the property package.
    "Phases", ":math:`p`", "['Liq', 'Vap']"
  
 
-Variables
+Parameters
 ---------
-The following variables are calculated by fixing the default degree of freedoms above.
+
+The following parameters are used and are not mutable.
 
 .. csv-table::
-   :header: "Description", "Symbol", "Variable Name", "Units"
+   :header: "Description", "Parameter Name", "Symbol", "Units"
 
-   "Thermal power requirement", ":math:`P_{req}`", "thermal_power_requirement",  ":math:`\text{kW}`"
-   "Specific thermal energy consumption", ":math:`STEC`", "specific_energy_consumption_thermal",  ":math:`\text{kWh} / \text{m}^3`"
-   "Total seawater mass flow rate (feed + cooling)", ":math:`m_{seawater,total}`", "feed_cool_mass_flow",  ":math:`\text{kg} / \text{s}`"
-   "Total seawater volumetric flow rate (feed + cooling)", ":math:`v_{seawater,total}`", "feed_cool_vol_flow",  ":math:`\text{m}^3 / \text{h}`"
+   "Number of collectors", "``number_collectors``", ":math:`{n}_{c}`", ":math:`\text{dimensionless}`"
+   "Collector heat removal factor", "``FR``", ":math:`{F}_{R}`", ":math:`\text{dimensionless}`"
+   "Effective transmittance-absorption product", "``ta``", ":math:`\tau\alpha`", ":math:`\text{dimensionless}`"
+   "Overall collector heat loss coefficient", "``UL``", ":math:`{U}_{L}`", ":math:`\text{W}/\text{m}^2\text{K}`"
+   "Mass flow rate of fluid during characterization test", "``mdot_test``", ":math:`\dot{m}_{test}`", ":math:`\text{kg} / \text{s}`"
+   "Specific heat capacity of fluid during characterization test", "``cp_test``", ":math:`{c}_{ptest}`", ":math:`\text{J}/\text{kg}\text{K}`"
+   "Pump power", "``pump_power``", ":math:`{P}_{pump}`", ":math:`\text{W}`"
+   "Pump efficiency", "``pump_eff``", ":math:`\eta_{pump}`",":math:`\text{dimensionless}`"
+   "Ambient temperature", "``T_amb``", ":math:`{T}_{amb}`",":math:`\text{K}`"
+   "Maximum irradiance at the location", "``G_max``", ":math:`{G}_{max}`", ":math:`\text{W} / \text{m}^2`"
 
 
 Equations
 ---------
+
+The following equations calculate the variables used in estimating heat transfer in a flat plate collector.
+
 .. csv-table::
-   :header: "Description", "Equation"
+   :header: "Description", "Equation", "Units"
 
-   "Temperature in the last effect", ":math:`T_{last} = \Delta T_{last} + T_{feed}`"
-   "Temperature of outlet cooling water", ":math:`T_{cooling,out} = \Delta T_{cooling,in} + T_{feed}`"
-   "Distillate volumetric flow rate (production rate)", ":math:`v_{distillate} = v_{feed} T_{feed}`"
-   "Steam mass flow rate", ":math:`m_{steam} = m_{distillate} / GOR`"
-   "Specific thermal energy consumption", ":math:`STEC = \frac{\Delta H_{vap} \times \rho_{distillate}}{GOR}`"
-   "Thermal power requirement", ":math:`P_{req} = STEC \times v_{distillate}`"
-   "Energy balance", ":math:`v_{seawater,total} \times (H_{cooling} - H_{feed}) = (1 - f_{Q_{loss}})\times P_{req} - m_{brine} H_{brine} - m_{distillate} H_{distillate} + m_{feed} H_{cooling}`"
+   "Product of collector efficiency factor and overall heat loss coefficient at test conditions", ":math:`F^{'}U_{L} = -(\dot{m}_{test}*{c}_{ptest})/A_{c}* log(1-{F}_{R}*{U}_{L}*A_{c}/(\dot{m}_{test}*{c}_{ptest}))`"
+   "Ratio of FRta_use to FRta_test", ":math:`r = \Delta T_{cooling,in} + T_{feed}`"
+   "Useful net heat gain", ":math:`Q_{useful} = v_{feed} T_{feed}`"
+   "Rated plant heat capacity in MW", ":math:`heat_load = m_{distillate} / GOR`"
+ 
 
-Surrogate equations and the corresponding coefficients for different number of effects can be found in the unit model class.
+Costing
+---------
 
-.. TODO: add link to the code of LT-MED unit model class
+
 
 References
 ----------
 
-[1] Palenzuela, P., Hassan, A. S., Zaragoza, G., & Alarcón-Padilla, D. C. (2014). Steady state model for
-multi-effect distillation case study: Plataforma Solar de Almería MED pilot plant. Desalination, 337,
-31-42.
-
-[2] Ortega-Delgado, B., Garcia-Rodriguez, L., & Alarcón-Padilla, D. C. (2017). Opportunities of
-improvement of the MED seawater desalination process by pretreatments allowing high-temperature
-operation. Desalin Water Treat, 97, 94-108.
+[1] Solar Engineering of Thermal Processes, Duffie and Beckman, 4th ed.
