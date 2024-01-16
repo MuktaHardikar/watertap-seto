@@ -18,7 +18,7 @@ Typically, the following 5 variables define the input stream and the output comp
    "Inlet volume flow rate", "``inlet.flow_mass_phase_comp['Vap','H2O']``", ":math:`m_{v}`", ":math:`\text{m}^3 / \text{s}`"
    "Inlet temperature", "``inlet.temperature``", ":math:`T_{f}`", ":math:`\text{K}`"
    "Inlet pressure", "``inlet.pressure``", "", ":math:`\text{Pa}`"
-   "Outlet pressure", "``inlet.pressure``", " ",  ":math:`\text{Pa}`"
+   "Outlet pressure", "``outlet.pressure``", " ",  ":math:`\text{Pa}`"
 
 The following variables must be fixed by the user for a fully defined model.
 
@@ -58,9 +58,9 @@ The following parameters are used and are not mutable.
    :header: "Description", "Parameter Name", "Symbol", "Units"
 
    "Number of collectors", "``number_collectors``", ":math:`{n}_{c}`", ":math:`\text{dimensionless}`"
-   "Collector heat removal factor", "``FR``", ":math:`{F}_{R}`", ":math:`\text{dimensionless}`"
+   "Collector heat removal factor at test conditions", "``FR``", ":math:`{F}_{R}`", ":math:`\text{dimensionless}`"
    "Effective transmittance-absorption product", "``ta``", ":math:`\tau\alpha`", ":math:`\text{dimensionless}`"
-   "Overall collector heat loss coefficient", "``UL``", ":math:`{U}_{L}`", ":math:`\text{W}/\text{m}^2\text{K}`"
+   "Overall collector heat loss coefficient at test conditions", "``UL``", ":math:`{U}_{L}`", ":math:`\text{W}/\text{m}^2\text{K}`"
    "Mass flow rate of fluid during characterization test", "``mdot_test``", ":math:`\dot{m}_{test}`", ":math:`\text{kg} / \text{s}`"
    "Specific heat capacity of fluid during characterization test", "``cp_test``", ":math:`{c}_{ptest}`", ":math:`\text{J}/\text{kg}\text{K}`"
    "Pump power", "``pump_power``", ":math:`{P}_{pump}`", ":math:`\text{W}`"
@@ -75,12 +75,12 @@ Equations
 The following equations calculate the variables used in estimating heat transfer in a flat plate collector.
 
 .. csv-table::
-   :header: "Description", "Equation", "Units"
+   :header: "Description", "Variable Name", "Equation", "Units"
 
-   "Product of collector efficiency factor and overall heat loss coefficient at test conditions", ":math:`F^{'}U_{L} = -(\dot{m}_{test}*{c}_{ptest})/A_{c}* log(1-{F}_{R}*{U}_{L}*A_{c}/(\dot{m}_{test}*{c}_{ptest}))`"
-   "Ratio of FRta_use to FRta_test", ":math:`r = \Delta T_{cooling,in} + T_{feed}`"
-   "Useful net heat gain", ":math:`Q_{useful} = v_{feed} T_{feed}`"
-   "Rated plant heat capacity in MW", ":math:`heat_load = m_{distillate} / GOR`"
+   "Product of collector efficiency factor and overall heat loss coefficient at test conditions","``Fprime_UL``", ":math:`F^{'}U_{L} = -(\dot{m}_{test}*{c}_{ptest})/A_{c}* log(1-{F}_{R}*{U}_{L}*A_{c}/(\dot{m}_{test}*{c}_{ptest}))`",""
+   "Ratio of FRta_use to FRta_test","``r``", ":math:`r = [m_{l}*{c}_{ptest}/A_{c}]*[1 - exp(-A_{c}*F^{'}U_{L}/m_{l}*{c}_{ptest})]/F_{R}*U_{L}|_{test}`", ""
+   "Useful net heat gain","``Q_useful``", ":math:`Q_{useful} = {n}_{c}*A_{c}*r*(F_{R}*\tau\alpha*G_{total}*\tau\alpha  - F_{R}*U_{L}*(T_{f}-{T}_{amb}))`", ":math:`\text{W}`"
+   "Rated plant heat capacity", "``heat_load``", ":math:`h_{load} = {n}_{c}*A_{c}*(F_{R}*\tau\alpha*G_{total}*\tau\alpha)`", ":math:`\text{MW}`"
  
 
 Costing
