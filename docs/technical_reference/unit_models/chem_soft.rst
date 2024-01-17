@@ -23,43 +23,43 @@ Additionally, depending on the chemical softening process selected, chemical dos
 Typically, the following 7 variables define the input feed.
 
 .. csv-table::
-   :header: "Variables", "Variable Name",  "Unit"
+   :header: "Variables", "Variable Name", "Symbol", "Unit"
 
-   "Feed volume flow rate", "properties_in[0].flow_mass_phase_comp['Liq','H2O']",  ":math:`\text{m}^3 / \text{s}`"
-   "Feed composition", "properties_in[0].flow_mass_phase_comp['Liq','Ca_2+']",  ":math:`\text{g/}\text{L}`"
-   "Feed composition", "properties_in[0].flow_mass_phase_comp['Liq','Mg_2+']",  ":math:`\text{g/}\text{L}`"
-   "Feed composition", "properties_in[0].flow_mass_phase_comp['Liq','Alkalinity_2-']",  ":math:`\text{g/}\text{L}`"
-   "Feed temperature", "feed_props.temperature",  ":math:`^o\text{C}`"
-   "Ca2+ effluent target in CaCO3 equivalents", "ca_eff_target", ":math:`\text{g/}\text{L}`"
-   "Mg2+ effluent target in CaCO3 equivalents", "mg_eff_target", ":math:`\text{g/}\text{L}`"
+   "Feed volume flow rate", "``properties_in[0].flow_vol_phase['Liq']``", ":math:`Q_{feed}`", ":math:`\text{m}^3 / \text{s}`"
+   "Feed composition", "``properties_in[0].flow_mass_phase_comp['Liq','Ca_2+']``", ":math:`m_{Ca^{2+}}`", ":math:`\text{g/}\text{L}`"
+   "Feed composition", "``properties_in[0].flow_mass_phase_comp['Liq','Mg_2+']``", ":math:`m_{Mg^{2+}}`", ":math:`\text{g/}\text{L}`"
+   "Feed composition", "``properties_in[0].flow_mass_phase_comp['Liq','Alkalinity_2-']``",":math:`m_{alk}`",  ":math:`\text{g/}\text{L}`"
+   "Feed temperature", "``feed_props.temperature``", ":math:`T`", ":math:`^o\text{C}`"
+   "Ca2+ effluent target in CaCO3 equivalents", "``ca_eff_target``", "", ":math:`\text{g/}\text{L}`"
+   "Mg2+ effluent target in CaCO3 equivalents", "``mg_eff_target``", "", ":math:`\text{g/}\text{L}`"
    
 The following 11 variables define the system design.
 
 .. csv-table::
-   :header: "Variables", "Variable Name", "Valid Range", "Unit"
+   :header: "Variables", "Variable Name", "Symbol",  "Valid Range", "Unit"
 
-   "Number of mixers", "no_of_mixer", "", ":math:`\text{dimensionless}`"
-   "Number of flocculators", "no_of_floc","",  ":math:`\text{dimensionless}`"
-   "Retention time of mixer", "retention_time_mixer", "0.1-5", ":math:`\text{min}`"
-   "Retention time of flocculator", "retention_time_floc", "10-45", ":math:`\text{min}`"
-   "Retention time of sedimentation basin", "retention_time_sed","120-240",  ":math:`\text{min}`"
-   "Retention time of recarbonation basin", "retention_time_recarb", "15-30", ":math:`\text{min}`"
-   "Fractional volume recovery", "frac_vol_recovery","", ":math:`\text{dimensionless}`"
-   "Removal efficiency of components (except Ca2+ and Mg2+)", "removal_efficiency", "",":math:`\text{dimensionless}`"
-   "CO2 dose in CaCO3 equivalents", "CO2_CaCO3","", ":math:`\text{g/}\text{L}`"
-   "Velocity gradient in mixer", "vel_gradient_mix", "300-1000",":math:`\text{/}\text{s}`"
-   "Velocity gradient in flocculator", "vel_gradient_floc","20-80", ":math:`\text{/}\text{s}`"
+   "Number of mixers", "``no_of_mixer``", ":math:`n_{mixer}`", "", ":math:`\text{dimensionless}`"
+   "Number of flocculators", "``no_of_floc``", ":math:`n_{floc}`", "", ":math:`\text{dimensionless}`"
+   "Retention time of mixer", "``retention_time_mixer``", ":math:`RT_{mixer}`", "0.1-5", ":math:`\text{min}`"
+   "Retention time of flocculator", "``retention_time_floc``", ":math:`RT_{floc}`", "10-45", ":math:`\text{min}`"
+   "Retention time of sedimentation basin", "``retention_time_sed``", ":math:`RT_{sed}`", "120-240",  ":math:`\text{min}`"
+   "Retention time of recarbonation basin", "``retention_time_recarb``", ":math:`RT_{recarb}`", "15-30", ":math:`\text{min}`"
+   "Fractional volume recovery", "``frac_vol_recovery``", "", "", ":math:`\text{dimensionless}`"
+   "Removal efficiency of components (except Ca2+ and Mg2+)", "``removal_efficiency``", "","",":math:`\text{dimensionless}`"
+   "CO2 dose in CaCO3 equivalents", "``CO2_CaCO3``",":math:`CO_{2,CaCO_{3}-hardness}`","", ":math:`\text{g/}\text{L}`"
+   "Velocity gradient in mixer", "``vel_gradient_mix``", ":math:`\text{velocity gradient}_{mixer}`", "300-1000",":math:`\text{/}\text{s}`"
+   "Velocity gradient in flocculator", "``vel_gradient_floc``", ":math:`\text{velocity gradient}_{floc}`", "20-80", ":math:`\text{/}\text{s}`"
 
 The following variables should be fixed to 0 if their dose is not calculated in the softening procedure for the model to be fully specified. 
 The softening procedure where the doses are calculated in are listed in the table.
 
 .. csv-table::
-   :header: "Variables", "Softening procedure", "Variable Name",  "Unit"
+   :header: "Variables", "Softening procedure", "Variable Name", "Symbol", "Unit"
 
-   "Excess lime", "excess_lime, excess_lime_soda", "excess_CaO", ":math:`\text{g/}\text{L}`"
-   "Soda ash","single_stage_lime_soda, excess_lime_soda ", "Na2CO3_dosing", ":math:`\text{g/}\text{L}`" 
-   "CO2 dose in second basin","excess_lime_soda", "CO2_second_basin", ":math:`\text{g/}\text{L}`" 
-   "MgCl2","Silica removal", "MgCl2_dosing", ":math:`\text{g/}\text{L}`" 
+   "Excess lime", "excess_lime, excess_lime_soda", "``excess_CaO``", ":math:`CaO`", ":math:`\text{g/}\text{L}`"
+   "Soda ash","single_stage_lime_soda, excess_lime_soda ", "``Na2CO3_dosing``", ":math:`Na_{2}CO_{3}`", ":math:`\text{g/}\text{L}`" 
+   "CO2 dose in second basin","excess_lime_soda", "``CO2_second_basin``", ":math:`CO_{2,second-basin}`", ":math:`\text{g/}\text{L}`" 
+   "MgCl2","Silica removal", "``MgCl2_dosing``", ":math:`MgCl_{2}`", ":math:`\text{g/}\text{L}`" 
 
 
 Solution Composition
@@ -95,13 +95,13 @@ Parameters
 The following parameters are used as default values and are not mutable. 
 
 .. csv-table::
-   :header: "Description", "Parameter Name"
+   :header: "Description", "Parameter Name", "Symbol"
 
-   "Ratio of MgCl2 to SiO2", "``MgCl2_SiO2_ratio``"
-   "Sludge produced per kg Ca in CaCO3 hardness", "``Ca_hardness_CaCO3_sludge_factor``"
-   "Sludge produced per kg Mg in CaCO3 hardness", "``Mg_hardness_CaCO3_sludge_factor``"
-   "Sludge produced per kg Mg in non-CaCO3 hardness", "``Mg_hardness_nonCaCO3_sludge_prod_factor``"
-   "Multiplication factor to calculate excess CaO", "``excess_CaO_coeff``"
+   "Ratio of MgCl2 to SiO2", "``MgCl2_SiO2_ratio``", ":math:`Ratio_{MgCl_{2}/SiO_{2}}`"
+   "Sludge produced per kg Ca in CaCO3 hardness", "``Ca_hardness_CaCO3_sludge_factor``", ":math:`\text{Ca-SF}_{CaCO_{3}-hardness}`"
+   "Sludge produced per kg Mg in CaCO3 hardness", "``Mg_hardness_CaCO3_sludge_factor``", ":math:`\text{Mg-SF}_{CaCO_{3}-hardness}`"
+   "Sludge produced per kg Mg in non-CaCO3 hardness", "``Mg_hardness_nonCaCO3_sludge_prod_factor``", ":math:`\text{Mg-SF}_{non-CaCO_{3}-hardness}`"
+   "Multiplication factor to calculate excess CaO", "``excess_CaO_coeff``", ""
 
 
 Equations
@@ -141,24 +141,14 @@ The chemical dose is calculated based on the type of softening procedure selecte
 The following equations are independent of the softening procedure selected but depend on the feed composition.
 
 .. csv-table::
-   :header: "Description", "Equation"
+   :header: "Description", "Variable Name", "Symbol", "Equation"
 
-   "MgCl2 dose (if silica removal is selected)", "MgCl2_SiO2_ratio * properties_in[0].conc_mass_phase_comp['Liq', 'SiO2'] "
-   "Sludge produced", "properties_in[0].flow_vol_phase['Liq'] * 
-   
-   (Ca_hardness_CaCO3_sludge_factor * Ca_hardness_CaCO3 + 
-   
-   Mg_hardness_CaCO3_sludge_factor * Mg_hardness_CaCO3 + 
-   
-   Ca_hardness_nonCaCO3 +  
-   
-   Mg_hardness_nonCaCO3_sludge_prod_factor * Mg_hardness_nonCaCO3 + 
-   
-   excess_CaO + prop_in.conc_mass_phase_comp['Liq', 'TSS'] + MgCl2_dosing)"
-   "Volume of mixer", "properties_in[0].flow_vol_phase['Liq'] * retention_time_mixer * no_of_mixer"
-   "Volume of flocculator", "properties_in[0].flow_vol_phase['Liq'] * retention_time_floc * no_of_floc"
-   "Volume of sedimentation basin", "properties_in[0].flow_vol_phase['Liq'] * retention_time_sed"
-   "Volume of recarbonation basin", "properties_in[0].flow_vol_phase['Liq'] * retention_time_recarb"
+   "MgCl2 dose (if silica removal is selected)", "``mgcl2_dosing``", ":math:`MgCl_{2}`", ":math:`Ratio_{MgCl_{2}/SiO_{2}} * SiO_{2}`` "
+   "Sludge produced", "``sludge_prod``", ":math:`m_{sludge}`",  ":math:`Q_{feed} * (\text{Ca-SF}_{CaCO_{3}-hardness} * Ca_{CaCO_{3}-hardness} + \text{Mg-SF}_{CaCO_{3}-hardness} * Mg_{CaCO_{3}-hardness} + Ca_{non-CaCO_{3}-hardness} + \text{Mg-SF}_{non-CaCO_{3}-hardness} * Mg_{non-CaCO_{3}-hardness} + \text{Excess CaO} + TSS + MgCl_{2})`"
+   "Volume of mixer", "``volume_mixer``", ":math:`V_{mixer}`", ":math:`Q_{feed} * RT_{mixer} * n_{mixer}`"
+   "Volume of flocculator", "``volume_floc``", ":math:`V_{floc}`", ":math:`Q_{feed} * RT_{floc} * n_{floc}`"
+   "Volume of sedimentation basin", "``volume_sed``", ":math:`V_{sed}`", ":math:`Q_{feed} * RT_{sed}`"
+   "Volume of recarbonation basin", "``volume_recarb``", ":math:`V_{recarb}`", ":math:`Q_{feed} * RT_{recarb}`"
 
 Costing
 ---------
@@ -167,31 +157,62 @@ The following table lists out the coefficients used in the equations to calculat
 for the mixer, flocculator, sedimentation basin and recarbonation basin. The coefficients are assigned as mutable Parameters.
 
 .. csv-table::
-   :header: "Unit", "Symbol", "_constant", "_coeff/_coeff_1", "_coeff_2","_coeff_3","_exp/_exp_1","_exp_2"
+   :header: "Unit", "Variable Name", "``_constant``", "``_coeff/_coeff_1``", "``_coeff_2``", "``_coeff_3``", "``_exp/_exp_1``", "``_exp_2``"
 
-   "Mixer", "mix_tank_capital", "28584", "0.0002","22.776","", "2", "" 
-   "Flocculator", "floc_tank_capital", "217222", "673894", "", "", "", ""
-   "Sedimentation basin", "sed_basin_capital", "182801", "-0.0005", "86.89", "", "2", ""
-   "Recarbonation basin", "recarb_basin_capital", "19287", "4e-9", "-0.0002", "10.027", "3", "2"
-   "Recarbonation basin source", "recarb_basin_source_capital", "130812", "9e-8", "-0.001", "42.578", "", "2"
-   "Lime feed system", "lime_feed_system_capital", "193268", "20.065", "", "", "", ""
-   "Administrative capital", "floc_tank_capital", "", "", "", "", "", ""
-   "Mixer", "mix_tank_capital", "28584", "0.0002","22.776","", "2", "" 
-   "Flocculator", "floc_tank_capital", "", "", "", "", "", ""
-   "Sedimentation basin", "floc_tank_capital", "", "", "", "", "", ""
-   "Recarbonation basin", "floc_tank_capital", "", "", "", "", "", ""
+   "**Capital**", "", "", "", "", "", "", ""
+   "Mixer", "``mix_tank_capital``", "28584", "0.0002","22.776","", "2", "" 
+   "Flocculator", "``floc_tank_capital``", "217222", "673894", "", "", "", ""
+   "Sedimentation basin", "``sed_basin_capital``", "182801", "-0.0005", "86.89", "", "2", ""
+   "Recarbonation basin", "``recarb_basin_capital``", "19287", "4e-9", "-0.0002", "10.027", "3", "2"
+   "Recarbonation basin source", "``recarb_basin_source_capital``", "130812", "9e-8", "-0.001", "42.578", "", "2"
+   "Lime feed system", "``lime_feed_system_capital``", "193268", "20.065", "", "", "", ""
+   "Administrative capital", "``admin_capital``", "", "69195", "", "", "0.5523", ""
+   "**Operating**", "", "", "", "", "", "", ""
+   "Mixer", "``mix_tank_op``", "22588", "-3e-8","0.0008","2.8375", "3", "2" 
+   "Flocculator", "``floc_tank_op``", "6040", "3e-13", "-4e-7", "0.318", "3", "2"
+   "Sedimentation basin", "``sed_basin_op``", "6872", "7e-10", "-0.00005", "1.5908", "3", "2"
+   "Recarbonation basin", "``recarb_basin_op``", "10265", "1e-8", "-0.0004", "6.19", "3", "2"
+   "Lime feed system", "``lime_feed_system_op``", "", "4616.7", "", "", "0.4589", ""
+   "Lime sludge management system", "``sludge_disposal_cost``", "", "35", "", "", "", ""
+   "Administrative Operational", "``admin_op``", "", "88589", "", "", "0.4589", ""
 
-The following equations are used to calculate the capital and operating costs for the mixer, flocculator, sedimentation basin and recarbonation basin units
+The following equations are used to calculate the components of the capital costs for the mixer, flocculator, sedimentation basin and recarbonation basin units
 and other costs.
 
 .. csv-table::
-   :header: "Unit", "Symbol", "Equation"
+   :header: "Unit", "Equation"
+
+   "Mixer", ":math:`\text{Capital Cost}_{mixer} = (0.0002 * V_{mixer})^{2}  +  (22.776 * V_{mixer}) + 28584`"
+   "Flocculator", ":math:`\text{Capital Cost}_{floc} = (673894 * V_{floc}) + (C_2 * V_{floc}) + 217222`"
+   "Sedimentation basin", ":math:`\text{Capital Cost}_{sed} = (-0.0005 * V_{sed}/Depth_{sed})^{2}  +  (86.89 * V_{mixer}/Depth_{sed}) + 182801`"
+   "Recarbonation basin", ":math:`\text{Capital Cost}_{recarb} = (4e-9 * V_{recarb})^{3}  +  (-0.0002 * V_{recarb})^{2} + (10.027 * V_{recarb}) + 19287`"
+   "Recarbonation source basin", ":math:`\text{Capital Cost}_{recarb_source} = (9e-8 * (CO_{2,first-basin} + CO_{2,second-basin}))  +  (-0.001 * (CO_{2,first-basin} + CO_{2,second-basin})){2} + (42.578 * (CO_{2,first-basin} + CO_{2,second-basin})) + 130812`"
+   "Lime feed system", ":math:`\text{Capital Cost}_{lime} = (20.065 * CaO) + 193268`"
+   "Administrative", ":math:`\text{Capital Cost}_{admin} = (69195 * Q_{feed})^{0.5523}`"
 
 
-The following equations are used to calculate the power consumption by the mixer and the flocculator used to calculate total electricity consumption
+The following equations are used to calculate the components of the operating costs for the mixer, flocculator, sedimentation basin and recarbonation basin units
+and other costs.
 
 .. csv-table::
-   :header: "Unit", "Symbol", "Equation"
+   :header: "Unit", "Equation"
+
+   "Mixer", ":math:`\text{Operating Cost}_{mixer} = (-3e-8 * V_{mixer})^{3}  + (0.0008* V_{mixer})^{2} + (2.8375 * V_{mixer}) + 22588`"
+   "Flocculator", ":math:`\text{Operating Cost}_{floc} = (3e-13 * V_{floc})^{3} + (-4e-7 * V_{floc})^{2} + (0.318 * V_{floc}) + 6040`"
+   "Sedimentation basin", ":math:`\text{Operating Cost}_{sed} = (7e-10 * V_{sed}/Depth_{sed})^{3} + (-0.00005 * V_{mixer}/Depth_{sed})^{2} + (1.5908 * V_{mixer}/Depth_{sed}) + 6872`"
+   "Recarbonation basin", ":math:`\text{Operating Cost}_{recarb} = (1e-8* V_{recarb})^{3}  +  (-0.0004 * V_{recarb})^{2} + (6.19 * V_{recarb}) + 10265`"
+   "Lime feed system", ":math:`\text{Operating Cost}_{lime} = (4616.7 * CaO)^{0.4589}`"
+   "Lime sludge management", ":math:`\text{Operating Cost}_{lime-sludge} = (35 * m_{sludge})`"
+   "Administrative", ":math:`\text{Operating Cost}_{admin} = (88589 * Q_{feed})^{0.4589}`"
+
+
+The following equations are used to calculate the power consumption by the mixer and the flocculator used to calculate total electricity consumption.
+
+.. csv-table::
+   :header: "Unit", "Equation"
+
+   "Mixer", ":math:`Power_{mixer} = \text{velocity gradient}_{mixer}^{2} * V_{mixer} * viscosity`"
+   "Flocculator", ":math:`Power_{floc} = \text{velocity gradient}_{floc}^{2} * V_{floc} * viscosity`"
 
 References
 ----------

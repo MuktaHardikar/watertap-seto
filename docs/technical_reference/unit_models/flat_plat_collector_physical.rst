@@ -86,8 +86,17 @@ The following equations calculate the variables used in estimating heat transfer
 Costing
 ---------
 
+The capital cost includes direct costs, indirect costs and sales tax. The direct costs include
+cost of the collector and a contigency factor. The indirect costs are a fraction of the direct cost
+and include cost of land. A fixed operating cost is calculated as a linear function of heat load of
+flat plate collector.
 
+.. csv-table::
+   :header: "Description", "Variable Name", "Equation"
 
+   "Direct capital costs", "``direct_capital_cost``", ":math:`Capital Cost_{direct} = ({n}_{c}*A_{c}*\text{Cost per }m^{2})*(1+ \text{Contingecy fraction})`"
+   "Indirect capital costs", "``indirect_capital_cost``", ":math:`Capital Cost_{indirect} = Capital Cost_{direct}*\text{indirect capital cost fraction} + \text{Land area}*\text{Cost per acre}`"
+   
 References
 ----------
 
