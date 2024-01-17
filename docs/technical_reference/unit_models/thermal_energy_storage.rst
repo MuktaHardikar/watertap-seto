@@ -1,17 +1,12 @@
-Low Temperature - Multi-effect Distillation (LT-MED)
+Thermal Energy Storage (TES)
 ====================================================
 
-This Low Temperature Multi-effect Distillation (LT-MED) unit model
-   * supports steady-state only
-   * is a surrogate model
-   * is verified against the operation data from pilot-scale systems in Plataforma Solar de Almeria (PSA)
-
-.. TODO: Add index/reference to home page
-
+This is a thermal energy storage (TES) model assumes the tank is at a uniform temperature (similar to a continuous stirred tank).
+This TES model supports supports steady-state only.
 
 Degrees of Freedom
 ------------------
-The LT-MED model has 5 degrees of freedom that should be fixed for the unit to be fully specified.
+The TES model has 5 degrees of freedom that should be fixed for the unit to be fully specified.
 
 Typically, the following variables are fixed, including the state variables at the inlet. 
 The valid range of each variable is listed based on the tested range of the surrogate equations.
