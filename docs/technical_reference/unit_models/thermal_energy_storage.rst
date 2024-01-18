@@ -4,57 +4,53 @@ Thermal Energy Storage (TES)
 This is a thermal energy storage (TES) model assumes the tank is at a uniform temperature (similar to a continuous stirred tank).
 This TES model supports supports steady-state only.
 
-Degrees of Freedom
-------------------
-The TES model has 5 degrees of freedom that should be fixed for the unit to be fully specified.
-
-Typically, the following variables are fixed, including the state variables at the inlet. 
-The valid range of each variable is listed based on the tested range of the surrogate equations.
-
-.. csv-table::
-   :header: "Variables", "Variable name", "Symbol", "Valid range", "Unit"
-
-   "Feed salinity", "feed_props.conc_mass_phase_comp['Liq', 'TDS']", ":math:`X_{f}`", "30 - 60", ":math:`\text{g/}\text{L}`"
-   "Feed temperature", "feed_props.temperature", ":math:`T_{f}`", "15 - 35", ":math:`^o\text{C}`"
-   "Heating steam temperature", "steam_props.temperature", ":math:`T_{s}`", "60 - 85", ":math:`^o\text{C}`"
-   "Recovery ratio", "recovery_vol_phase['Liq']", ":math:`RR`", "0.3 - 0.5", ":math:`\text{dimensionless}`"
-   "Feed volume flow rate", "feed_props.flow_vol_phase['Liq']", ":math:`v_{f}`", "", ":math:`\text{m}^3 / \text{s}`"
-   
-The first four variables are independent input variables to the surrogate equations. 
-Typically the feed volume flow rate can be determined given a desired system capacity:
-
-:math:`v_{f} = \frac{Capacity}{RR}`
-
-
 Model Structure
 ---------------
 
-This LT-MED model consists of 4 StateBlocks (as 4 Ports in parenthesis below).
+This TES model consists of 4 StateBlocks (as 4 Ports in parenthesis below). Two state blocks connect
+to the the external heat exchanger which adds heat to the TES and two ports connect to the process side
+and provide heat to the treatment process.
 
-* Feed flow (feed)
-* Distillate (distillate)
-* Brine flow (brine)
-* Heating steam (steam)
-
-The number of effects, as a key design parameter of the LT-MED model, 
-should be provided in the specific configuration key-value pair below.
-
-``num_effects``: an integer between 3 to 14. 
-
-In this model, numbers of effects of 3, 6, 9, 12, 14 are verified with the 
-operational data, and the other numbers in between are interpolated by those 
-validated numbers.
-
+* Heat exchanger inlet (tes_hx_inlet)
+* Heat exchanger outlet (tes_hx_outlet)
+* Process inlet (tes_process_inlet)
+* Process outlet (tes_process_outlet)
 
 Sets
 ----
+
 .. csv-table::
    :header: "Description", "Symbol", "Indices"
 
    "Time", ":math:`t`", "[0]"
    "Phases", ":math:`p`", "['Liq', 'Vap']"
-   "Components", ":math:`j`", "['H2O', 'TDS']"
+   "Components", ":math:`j`", "['H2O']"
 
+Degrees of Freedom/ Variables
+------------------
+
+The TES model has 4 degrees of freedom that should be fixed for the unit to be fully specified
+in addition to the state variables at the inlet and outlet.
+Typically the following variables define the input and output heat exchanger and process ports listed above. 
+
+.. csv-table::
+   :header: "Variables", "Variable name", "Symbol", "Valid range", "Unit"
+
+   "Temperature", "temperature", ":math:`T_{f}`", "298 - 398", ":math:`\text{K}`"
+   "Pressure", "pressure", ":math:`P`", "", ":math:`Pa`"
+   "Mass flow rate of vapor phase", "flow_mass_phase_comp[0,'Vap','H2O']", "", ":math:`kg/s`"
+   "Mass flow rate of liquid phase", "flow_mass_phase_comp[0,'Liq','H2O']", "", "", ":math:`kg/s`"
+   
+The following variables should also be fixed. An initial temperature is assigned to the outlet stream at the heat exhanger and process loop.
+
+.. csv-table::
+   :header: "Variables", "Variable name", "Symbol", "Valid range", "Unit"
+
+   "Initial temperature", "tes_initial_temp", ":math:`T_{0}`", "298 - 398", ":math:`\text{K}`"
+   "Time step", "dt", ":math:`d_{t}`", "", ":math:`h`"
+   "Hours of storage", "hours_storage", "0-24", ":math:`h`"
+   "Heat load", "heat_load", ":math:`\text{heat_load}`", "", ":math:`MWh`"
+   
 
 Variables
 ---------
