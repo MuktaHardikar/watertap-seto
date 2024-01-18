@@ -4,7 +4,7 @@ Chemical Softening
 This chemical softening unit model calculates the chemical dose required for target removal of hardness causing components. 
 The model also calculates the size the mixer, flocculator, sedimentation basin and the recarbonation basin. This chemical softening model
    * supports steady-state only
-   * predicts the outlet concentration of Ca2+ and Mg2+
+   * predicts the outlet concentration of :math:`\text{Ca}^{2+}` and :math:`\text{Mg}^{2+}`
    * is verified against literature data
 
 Configuration Inputs
@@ -65,6 +65,30 @@ The softening procedure where the doses are calculated in are listed in the tabl
 Solution Composition
 ---------------
 
+This chemical softening model requires an input solute list from the user. Components that must be included
+are shown in the code below. Additional elements may added.
+
+.. code-block::
+   
+   component_list = ["Ca_2+","Mg_2+","Alkalinity_2-"]
+
+A default removal efficiency is assumed for components (other than :math:`\text{Ca}^{2+}` and :math:`\text{Mg}^{2+}`).
+Users can provide an input dictionary of removal efficiencies for each of the components.
+
+.. code-block::
+
+   removal_eff_dict = dict(
+            zip([
+                x for x in component_list if x not in ["Ca_2+","Mg_2+"]
+                ]
+                ,
+                [   
+                    0.7 if j != "TDS" else 1e-3
+                    for j in component_list 
+                ],
+            )
+        )
+
 
 Model Structure
 ---------------
@@ -80,7 +104,7 @@ The softening procedure type and whether or not silica removal is desired is set
 Sets
 ----
 
-The components Ca2+, Mg2+ and Alkalinity_2- must be included in the components.
+The components :math:`\text{Ca}^{2+}`, :math:`\text{Mg}^{2+}` and :math:`\text{Alkalinity}^{2-}` must be included in the components.
 
 .. csv-table::
    :header: "Description", "Symbol", "Indices"
@@ -90,7 +114,7 @@ The components Ca2+, Mg2+ and Alkalinity_2- must be included in the components.
    "Components", ":math:`j`", "['H2O', 'Ca_2+', ' Mg_2+', 'Alkalinity_2-']"
 
 Parameters
----------
+----------
 
 The following parameters are used as default values and are not mutable. 
 
