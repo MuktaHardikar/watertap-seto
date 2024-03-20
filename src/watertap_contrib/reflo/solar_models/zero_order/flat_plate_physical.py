@@ -168,12 +168,12 @@ class FlatPlatePhysicalData(SolarEnergyBaseData):
             doc="Effective transmittance-absorption product",
         )
 
-        self.heat_loss_coeff = Param(
-            initialize=1,
-            units=pyunits.watt / (pyunits.m**2 * pyunits.K),
-            mutable=True,
-            doc="Overall collector heat loss coefficient",
-        )
+        # self.heat_loss_coeff = Param(
+        #     initialize=1,
+        #     units=pyunits.watt / (pyunits.m**2 * pyunits.K),
+        #     mutable=True,
+        #     doc="Overall collector heat loss coefficient",
+        # )
 
         self.mdot_test = Param(
             initialize=1,
