@@ -192,7 +192,7 @@ def plot_training_validation(
 
 #########################################################################################################
 if __name__ == "__main__":
-    heat_load_range = (10, 100)  # must be (10, 100) or (100, 500)
+    heat_load_range = (1, 500)  # must be (10, 100) or (100, 500)
     hours_storage_range = (0, 26)
     dataset_filename = Path(__file__).parent / "trough_data.pkl"
     surrogate_filename = (
@@ -204,10 +204,11 @@ if __name__ == "__main__":
     input_labels = ["heat_load", "hours_storage"]
     output_labels = ["heat_annual_scaled", "electricity_annual_scaled"]
 
-    if heat_load_range in TroughSurrogateData.surrogate_scaling_dict.keys():
-        scaling = TroughSurrogateData.surrogate_scaling_dict[heat_load_range]
-    else:
-        raise ValueError("heat_load_range must be (10, 100) or (100, 500)")
+    # This is no longer used
+    # if heat_load_range in TroughSurrogateData.surrogate_scaling_dict.keys():
+    #     scaling = TroughSurrogateData.surrogate_scaling_dict[heat_load_range]
+    # else:
+    #     raise ValueError("heat_load_range must be (10, 100) or (100, 500)")
 
     # Get training and validation data
     data_training, data_validation = get_training_validation(
@@ -217,10 +218,10 @@ if __name__ == "__main__":
         heat_load_range,
         hours_storage_range,
     )
-    data_training["heat_annual_scaled"] = data_training["heat_annual"] * scaling
-    data_training["electricity_annual_scaled"] = (
-        data_training["electricity_annual"] * scaling
-    )
+    # data_training["heat_annual_scaled"] = data_training["heat_annual"] * scaling
+    # data_training["electricity_annual_scaled"] = (
+    #     data_training["electricity_annual"] * scaling
+    # )
 
     # Create surrogate and save to file
     surrogate = create_rbf_surrogate(
@@ -233,11 +234,11 @@ if __name__ == "__main__":
     # Delete surrogate testing file
     os.remove(surrogate_filename)
 
-    # Create parity and residual plots for training and validation
-    data_validation["heat_annual_scaled"] = data_validation["heat_annual"] * scaling
-    data_validation["electricity_annual_scaled"] = (
-        data_validation["electricity_annual"] * scaling
-    )
+    # # Create parity and residual plots for training and validation
+    # data_validation["heat_annual_scaled"] = data_validation["heat_annual"] * scaling
+    # data_validation["electricity_annual_scaled"] = (
+    #     data_validation["electricity_annual"] * scaling
+    # )
     plot_training_validation(
         surrogate, data_training, data_validation, input_labels, output_labels
     )
@@ -292,20 +293,21 @@ if __name__ == "__main__":
     print("\n")
     print("Heat rate = {x:.0f} MWt".format(x=value(m.fs.heat_load)))
     print("Hours of storage = {x:.1f} hrs".format(x=value(m.fs.hours_storage)))
-    print(
-        "Annual heat output = {x:.2e} kWht".format(
-            x=value(m.fs.annual_energy_scaled) / scaling
-        )
-    )
-    print(
-        "Annual electricity input = {x:.2e} kWhe".format(
-            x=value(m.fs.electrical_load_scaled) / scaling
-        )
-    )
+    # print(
+    #     "Annual heat output = {x:.2e} kWht".format(
+    #         x=value(m.fs.annual_energy_scaled) / scaling
+    #     )
+    # )
+    # print(
+    #     "Annual electricity input = {x:.2e} kWhe".format(
+    #         x=value(m.fs.electrical_load_scaled) / scaling
+    #     )
+    # )
 
     ### Optimize the surrogate model #########################################################################################
     m.fs.heat_load.unfix()
     m.fs.hours_storage.unfix()
+    m.fs.hot_tank_set_point.unfix()
     m.fs.obj = Objective(expr=m.fs.annual_energy_scaled, sense=maximize)
 
     # solve the optimization
@@ -319,16 +321,16 @@ if __name__ == "__main__":
     print("Solve time: ", solve_time)
     print("Heat rate = {x:.0f} MWt".format(x=value(m.fs.heat_load)))
     print("Hours of storage = {x:.1f} hrs".format(x=value(m.fs.hours_storage)))
-    print(
-        "Annual heat output = {x:.2e} kWht".format(
-            x=value(m.fs.annual_energy_scaled) / scaling
-        )
-    )
-    print(
-        "Annual electricity input = {x:.2e} kWhe".format(
-            x=value(m.fs.electrical_load_scaled) / scaling
-        )
-    )
+    # print(
+    #     "Annual heat output = {x:.2e} kWht".format(
+    #         x=value(m.fs.annual_energy_scaled) / scaling
+    #     )
+    # )
+    # print(
+    #     "Annual electricity input = {x:.2e} kWhe".format(
+    #         x=value(m.fs.electrical_load_scaled) / scaling
+    #     )
+    # )
 
     x = 1
     pass
