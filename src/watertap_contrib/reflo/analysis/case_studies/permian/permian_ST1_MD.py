@@ -76,7 +76,7 @@ __all__ = [
 # Update membrane type and MD recovery
 
 
-def build_permian_st_md(Qin=5, Q_md=0.22478, Cin=118, water_recovery=0.1):
+def build_permian_st_md(Qin=5, Q_md=0.22478, Cin=118, water_recovery=0.4):
     """
     Build Permian pretreatment flowsheet
     """
@@ -129,7 +129,7 @@ def build_permian_st_md(Qin=5, Q_md=0.22478, Cin=118, water_recovery=0.1):
         num_inlets=2,
         inlet_list=["zo_mixer", "md_disposal"],
         energy_mixing_type=MixingType.none,
-        momentum_mixing_type=MomentumMixingType.equality,
+        momentum_mixing_type=MomentumMixingType.none,
     )
     m.water_recovery = water_recovery
 
@@ -262,6 +262,7 @@ def add_treatment_costing(m):
     add_dwi_costing(
         m, m.fs.treatment.DWI, flowsheet_costing_block=m.fs.treatment.costing
     )
+
     m.fs.treatment.md.unit.add_costing_module(m.fs.treatment.costing)
 
     m.fs.treatment.costing.cost_process()
@@ -272,7 +273,7 @@ def set_permian_pretreatment_scaling(m, calclate_m_scaling_factors=False, **kwar
     m.fs.properties.set_default_scaling(
         "flow_mass_comp",
         # 1 / value(flow_mass_water),
-        1e-2,
+        1e-3,
         index=("H2O"),
     )
 
@@ -291,7 +292,7 @@ def set_permian_pretreatment_scaling(m, calclate_m_scaling_factors=False, **kwar
 
     m.fs.properties_feed.set_default_scaling(
         "flow_mass_phase_comp",
-        1e-2,
+        1e-3,
         index=("Liq", "H2O"),
     )
 
@@ -302,8 +303,6 @@ def set_permian_pretreatment_scaling(m, calclate_m_scaling_factors=False, **kwar
     set_cart_filt_scaling(m, m.fs.treatment.cart_filt, calc_blk_scaling_factors=True)
 
     set_ec_scaling(m, m.fs.treatment.EC, calc_blk_scaling_factors=True)
-
-    # set_mvc_scaling(m, m.fs.treatment.MVC, calc_blk_scaling_factors=True)
 
     set_scaling_factor(
         m.fs.treatment.product.properties[0].flow_mass_phase_comp["Liq", "H2O"], 1e-2
@@ -397,24 +396,37 @@ def set_permian_pretreatment_scaling(m, calclate_m_scaling_factors=False, **kwar
         10,
     )
 
+    set_scaling_factor(
+        m.fs.treatment.disposal_SW_mixer.md_disposal_state[0].flow_mass_phase_comp[
+            "Liq", "H2O"
+        ],
+        1e-3,
+    )
+    set_scaling_factor(
+        m.fs.treatment.disposal_SW_mixer.md_disposal_state[0].flow_mass_phase_comp[
+            "Liq", "TDS"
+        ],
+        1e-2,
+    )
+
+
     # mixed state outlet
     set_scaling_factor(
         m.fs.treatment.disposal_SW_mixer.mixed_state[0].flow_mass_phase_comp[
             "Liq", "H2O"
         ],
-        1e-2,
+        1e-1,
     )
     set_scaling_factor(
         m.fs.treatment.disposal_SW_mixer.mixed_state[0].flow_mass_phase_comp[
             "Liq", "TDS"
         ],
-        0.1,
+        1e-2,
     )
 
     if calclate_m_scaling_factors:
         print("calclate_m_scaling_factors\n\n\n")
         calculate_scaling_factors(m)
-
 
 
 def init_st_md_system(m, **kwargs):
@@ -458,15 +470,19 @@ def init_st_md_system(m, **kwargs):
     # NOTE: variable that affects DOF in unclear way
     
     treat.disposal_SW_mixer.initialize()
-    # treat.disposal_SW_mixer.mixed_state[0].temperature.fix()
-    # treat.disposal_SW_mixer.mixed_state[0].pressure.fix()
+    treat.disposal_SW_mixer.mixed_state[0].temperature.fix()
+    treat.disposal_SW_mixer.mixed_state[0].pressure.fix()
     
     propagate_state(treat.disposal_SW_mixer_to_dwi)
     # NOTE: variables that affect DOF in unclear way
     # treat.DWI.feed.properties[0].temperature.fix()
     # treat.DWI.feed.properties[0].pressure.fix()
+    treat.DWI.unit.properties[0].flow_vol_phase
+    treat.DWI.unit.properties[0].conc_mass_phase_comp
     init_dwi(m, treat.DWI)
 
+    treat.product.properties[0].flow_vol_phase
+    treat.product.properties[0].conc_mass_phase_comp
     treat.product.initialize()
     
 
@@ -479,25 +495,50 @@ def run_permian_st_md():
     treat = m.fs.treatment
 
     set_operating_conditions(m)
-    set_permian_pretreatment_scaling(m, calclate_m_scaling_factors=True)
+    set_permian_pretreatment_scaling(m, calclate_m_scaling_factors=True)  # Doesn't solve without this even before costing
 
     treat.feed.properties[0].flow_vol
 
     init_st_md_system(m)
     print(f"DOF = {degrees_of_freedom(m)}")
 
-    # flow_vol = treat.product.properties[0].flow_vol_phase["Liq"]
-    # treat.costing.electricity_cost.fix(0.07)
-    # treat.costing.add_LCOW(flow_vol)
-    # treat.costing.add_specific_energy_consumption(flow_vol, name="SEC")
-    # treat.costing.initialize()
-
-    print(f"DOF = {degrees_of_freedom(m)}")
     results = solver.solve(m)
     print_infeasible_constraints(m)
     assert_optimal_termination(results)
 
-    # print(f"LCOW = {m.fs.treatment.costing.LCOW()}")
+    print("\n--------- Before costing solve Completed ---------\n")
+    report_MD(m, treat.md)
+
+    
+    # Add costing
+    add_treatment_costing(m)
+    
+    iscale.calculate_scaling_factors(m.fs.treatment.md.unit.mp)
+    if iscale.get_scaling_factor(m.fs.treatment.md.unit.overall_thermal_power_requirement) is None:
+        iscale.set_scaling_factor(m.fs.treatment.md.unit.overall_thermal_power_requirement, 1e-6)
+
+    if iscale.get_scaling_factor(m.fs.treatment.md.unit.overall_elec_power_requirement) is None:
+        iscale.set_scaling_factor(m.fs.treatment.md.unit.overall_elec_power_requirement, 1e-4)
+
+    if iscale.get_scaling_factor(m.fs.treatment.md.unit.mp.get_active_process_blocks()[-1].fs.vagmd.system_capacity) is None:
+        iscale.set_scaling_factor(m.fs.treatment.md.unit.mp.get_active_process_blocks()[-1].fs.vagmd.system_capacity, 1e6)
+    
+    treat.costing.initialize()
+        
+    flow_vol = treat.product.properties[0].flow_vol_phase["Liq"]
+    treat.costing.electricity_cost.fix(0.07)
+    treat.costing.add_LCOW(flow_vol)
+    treat.costing.add_specific_energy_consumption(flow_vol, name="SEC")
+
+    try:
+        results = solver.solve(m)
+        print_infeasible_constraints(m)
+    except ValueError:
+        print_infeasible_constraints(m)
+    assert_optimal_termination(results)
+    print("\n--------- After costing solve Completed ---------\n")
+
+    print(f"LCOW = {m.fs.treatment.costing.LCOW()}")
 
     return m
 
@@ -508,7 +549,55 @@ if __name__ == "__main__":
     treat = m.fs.treatment
     report_MD(m, treat.md)
     print(f"DOF = {degrees_of_freedom(m)}")
+ 
 
-    treat.disposal_SW_mixer.display()
-    treat.DWI.unit.properties[0].display()
+    system_recovery = (
+        treat.feed.properties[0].flow_vol() / treat.product.properties[0].flow_vol()
+    )
+
+    print(f"Pretreatment Recovery: {system_recovery:.2f}")
+
+    print(
+        f"Inlet flow_vol: {treat.feed.properties[0].flow_vol():.5f} {pyunits.get_units(treat.feed.properties[0].flow_vol)}"
+    )
+    print(
+        f'Inlet TDS conc: {treat.feed.properties[0].conc_mass_comp["tds"]():.2f} {pyunits.get_units(treat.feed.properties[0].conc_mass_comp["tds"])}'
+    )
+
+    print(
+        f'EC feed TDS conc: {treat.EC.feed.properties[0].conc_mass_comp["tds"]():.2f} {pyunits.get_units(treat.EC.feed.properties[0].conc_mass_comp["tds"])}'
+    )
+
+    print(
+        f'EC product TDS conc: {treat.EC.product.properties[0].conc_mass_comp["tds"]():.2f} { pyunits.get_units(treat.EC.product.properties[0].conc_mass_comp["tds"])}'
+    )
+
+    print(
+        f'EC disposal TDS conc: {treat.EC.disposal.properties[0].conc_mass_comp["tds"]():.2f} {pyunits.get_units(treat.EC.disposal.properties[0].conc_mass_comp["tds"])}'
+    )
+
+    print(
+        f'CF feed TDS conc: {treat.cart_filt.product.properties[0].conc_mass_comp["tds"]():.2f} {pyunits.get_units(treat.cart_filt.product.properties[0].conc_mass_comp["tds"])}'
+    )
+
+    print(
+        f'Product TDS conc: {treat.product.properties[0].conc_mass_phase_comp["Liq", "TDS"]():.2f} {pyunits.get_units(treat.product.properties[0].conc_mass_phase_comp["Liq", "TDS"]())}'
+    )
+
+    print(
+        f'Product flow_vol: {treat.product.properties[0].flow_vol_phase["Liq"]():.2f} {pyunits.get_units(treat.product.properties[0].flow_vol_phase["Liq"])}'
+    )
+
+    print(
+        f'DWI flow_vol: {treat.DWI.unit.properties[0].flow_vol_phase["Liq"]():.6f} {pyunits.get_units(treat.DWI.unit.properties[0].flow_vol_phase["Liq"])}'
+    )
+
+    print(
+        f'DWI TDS conc: {treat.DWI.unit.properties[0].conc_mass_phase_comp["Liq", "TDS"]():.2f} {pyunits.get_units(treat.DWI.unit.properties[0].conc_mass_phase_comp["Liq", "TDS"])}'
+    )
+    print(f"DWI pressure: {treat.DWI.feed.properties[0].pressure()} Pa")
+
+    print(
+        f"Translator pressure: {treat.disposal_SW_mixer.zo_mixer_state[0].pressure()} Pa"
+    )
     
