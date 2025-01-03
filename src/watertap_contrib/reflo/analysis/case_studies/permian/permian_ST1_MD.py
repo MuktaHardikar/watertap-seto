@@ -76,7 +76,7 @@ __all__ = [
 # Update membrane type and MD recovery
 
 
-def build_permian_st_md(Qin=5, Q_md=0.22478, Cin=118, water_recovery=0.4):
+def build_permian_st_md(Qin=5, Q_md=0.22478, Cin=118, water_recovery=0.1):
     """
     Build Permian pretreatment flowsheet
     """

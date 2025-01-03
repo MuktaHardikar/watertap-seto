@@ -140,14 +140,14 @@ def init_dwi(m, blk, solver=None):
 
 
 def add_dwi_costing(m, blk, flowsheet_costing_block=None):
-    """
-    Add DWI costing using BLM approach
-    """
     if flowsheet_costing_block is None:
         flowsheet_costing_block = m.fs.costing
 
     blk.unit.costing = UnitModelCostingBlock(
-        flowsheet_costing_block=flowsheet_costing_block
+        flowsheet_costing_block=flowsheet_costing_block,
+        costing_method_arguments={
+            "cost_method": "as_opex"
+        },  # could be "as_capex" or "blm"
     )
 
 
