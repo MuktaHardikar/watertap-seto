@@ -131,7 +131,6 @@ def build_permian_st_md(Qin=5, Q_md=0.22478, Cin=118, water_recovery=0.4):
         energy_mixing_type=MixingType.none,
         momentum_mixing_type=MomentumMixingType.none,
     )
-    m.water_recovery = water_recovery
 
     treat.chem_addition = FlowsheetBlock(dynamic=False)
     build_chem_addition(m, treat.chem_addition)
@@ -208,20 +207,6 @@ def build_permian_st_md(Qin=5, Q_md=0.22478, Cin=118, water_recovery=0.4):
     )
 
     TransformationFactory("network.expand_arcs").apply_to(m)
-
-    # treat.recovery = Var(
-    #     initialize=0.5,
-    #     bounds=(0, 1.0001),
-    #     units=pyunits.dimensionless,
-    #     doc="Overall system recovery",
-    # )
-
-    # m.fs.treatment.eq_recovery = Constraint(
-    #     expr=m.fs.treatment.recovery * m.fs.treatment.feed.properties[0].flow_vol
-    #     == m.fs.treatment.product.properties[0].flow_vol_phase["Liq"]
-    # )
-
-    # add_treatment_costing(m)
 
     return m
 
