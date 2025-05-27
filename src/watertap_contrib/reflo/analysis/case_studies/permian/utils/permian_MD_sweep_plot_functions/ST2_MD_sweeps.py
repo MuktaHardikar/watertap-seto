@@ -54,10 +54,10 @@ def plot_case_study(df,xcol,ax_dict):
 if __name__ == "__main__":
 
     sweep_dict = {
-    'heat_price':np.linspace(0.00447,0.011175,4),     # $/kwh
+    'heat_price':np.linspace(0.02875,0.08625,4),      # $/kwh
     'grid_frac_heat':np.linspace(0.5,0.9,4),
-    'cst_cost_per_total_aperture_area':np.linspace(186.5,466.25,4),
-    'cst_cost_per_storage_capital':np.linspace(31,77.5,4),
+    'cst_cost_per_total_aperture_area':np.linspace(148.5,445.5,4),
+    'cst_cost_per_storage_capital':np.linspace(31,93,4),
     'nacl_recovery_price':[0,-0.012,-0.024],
     }   
     
@@ -66,10 +66,11 @@ if __name__ == "__main__":
         'tds': 130,
         'water_recovery':0.5,
         'grid_frac_heat':0.5,
-        'heat_price':0.00894,
+        'heat_price':0.0166,
         "electricity_price":0.04346,
-        'cst_cost_per_total_aperture_area':373,
+        'cst_cost_per_total_aperture_area':297,
         'cst_cost_per_storage_capital': 62,
+        'cost_per_land_area':4000,
         'nacl_recovery_price':0,
     }
 
@@ -143,6 +144,7 @@ if __name__ == "__main__":
                 permian_cryst_config=permian_cryst_config,
                 cost_per_total_aperture_area=input_dict['cst_cost_per_total_aperture_area'],
                 cost_per_storage_capital=input_dict['cst_cost_per_storage_capital'],
+                cost_per_land_area = input_dict['cost_per_land_area'],
                 nacl_recovery_price = input_dict['nacl_recovery_price'],
                 )
         
@@ -162,6 +164,7 @@ if __name__ == "__main__":
                 permian_cryst_config=permian_cryst_config,
                 cost_per_total_aperture_area=input_dict['cst_cost_per_total_aperture_area'],
                 cost_per_storage_capital=input_dict['cst_cost_per_storage_capital'],
+                cost_per_land_area = input_dict['cost_per_land_area'],
                 nacl_recovery_price = input_dict['nacl_recovery_price'],
                 )
             

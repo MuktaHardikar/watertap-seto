@@ -752,7 +752,7 @@ def solve(
 
 def run_permian_st2_md(permian_cryst_config, Qin=5, tds=130, grid_frac_heat =0.5, 
                        water_recovery = 0.3, heat_price = 0.00894, electricity_price = 0.04346,
-                       cost_per_total_aperture_area = 373, cost_per_storage_capital= 62,
+                       cost_per_total_aperture_area = 373, cost_per_storage_capital= 62, cost_per_land_area = 4000,
                        nacl_recovery_price = 0,**kwargs):
     
     """
@@ -851,6 +851,7 @@ def run_permian_st2_md(permian_cryst_config, Qin=5, tds=130, grid_frac_heat =0.5
 
         m.fs.energy.costing.trough_surrogate.cost_per_total_aperture_area.fix(cost_per_total_aperture_area)
         m.fs.energy.costing.trough_surrogate.cost_per_storage_capital.fix(cost_per_storage_capital)
+        m.fs.energy.costing.trough_surrogate.cost_per_land_area.fix(cost_per_land_area)
         m.fs.treatment.costing.nacl_recovered.cost.set_value(nacl_recovery_price)
 
         print(f"DOF = {degrees_of_freedom(m)}")
@@ -979,7 +980,6 @@ def report_costing(blk):
     )
 
 
-
 def permian_md_reporting_variables(m):
     # For reporting purposes
     m.fs.treatment.md.unit.capital_cost = Param(
@@ -1009,8 +1009,44 @@ def sweep_feed_flow_salinity():
     sweep_dict = {
         'Qin':[1,5,9],
         'tds': [100,130,200],
-        'recovery': [0.59,0.48,0.23]
+        'recovery': [0.59,0.478,0.23]
     }
+
+def build_sweep(
+    Qin=5,
+    tds=130,
+    water_recovery=0.485,
+    grid_frac_heat=0.5,
+    heat_price=0.00894,
+    electricity_price=0.04346,
+    nacl_recovery_price = -0.024,
+    cst_cost_per_total_aperture_area=373,
+    cst_cost_per_storage_capital=62,
+    cost_per_land_area = 4000
+    
+):
+ 
+    permian_cryst_config = {
+    "operating_pressures": [0.45, 0.25, 0.208, 0.095], # Operating pressure of each effect (bar)
+    "nacl_yield": 0.9, # Yield
+    "heat_transfer_coefficient": 0.13
+    }
+ 
+    m = run_permian_st2_md(
+        Qin=Qin,
+        tds=tds,
+        water_recovery = water_recovery,   # Pretreatment + MD
+        grid_frac_heat = grid_frac_heat,
+        heat_price=heat_price,
+        electricity_price=electricity_price,
+        permian_cryst_config=permian_cryst_config,
+        cost_per_total_aperture_area = cst_cost_per_total_aperture_area,
+        cost_per_storage_capital= cst_cost_per_storage_capital,
+        cost_per_land_area = cost_per_land_area,
+        nacl_recovery_price = nacl_recovery_price,
+        )
+ 
+    return m
 
 
 def main():
@@ -1020,20 +1056,21 @@ def main():
     "heat_transfer_coefficient": 0.13
     }
 
-    heat_price = 0.00894
+    heat_price = 0.0166
     electricity_price = 0.04346  # Updated 0.0575 in USD 2023 to USD 2018
 
     m = run_permian_st2_md(
                         Qin=5, 
-                        tds=130, 
-                        water_recovery = 0.5,   # Pretreatment + MD
+                        tds=200, 
+                        water_recovery = 0.23,   # Pretreatment + MD
                         grid_frac_heat = 1,
                         heat_price=heat_price, 
                         electricity_price=electricity_price, 
                         permian_cryst_config=permian_cryst_config,
-                        cost_per_total_aperture_area = 373,
+                        cost_per_total_aperture_area = 297,
                         cost_per_storage_capital= 62,
-                        nacl_recovery_price = -0.024,
+                        cost_per_land_area = 4000,
+                        nacl_recovery_price = 0,
                         )
     
    

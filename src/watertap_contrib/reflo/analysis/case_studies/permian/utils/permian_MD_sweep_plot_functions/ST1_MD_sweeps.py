@@ -54,11 +54,11 @@ if __name__ == "__main__":
 
     sweep_dict = {
     'water_recovery':np.linspace(0.35,0.5,4),
-    'heat_price':np.linspace(0.00447,0.011175,4),     # $/kwh
+    'heat_price':np.linspace(0.02875,0.08625,4),     # $/kwh
     'grid_frac_heat':np.linspace(0.5,0.9,5),
-    'dwi_lcow':np.linspace(4.2,10.5,4),     # $/m3 treated water
-    'cst_cost_per_total_aperture_area':np.linspace(186.5,466.25,4),
-    'cst_cost_per_storage_capital':np.linspace(31,77.5,4),
+    'dwi_lcow':np.linspace(4.2,12.6,4),     # $/m3 treated water
+    'cst_cost_per_total_aperture_area':np.linspace(148.5,445.5,4),
+    'cst_cost_per_storage_capital':np.linspace(31,93,4),
     }   
     
     input_dict = {
@@ -66,11 +66,12 @@ if __name__ == "__main__":
         'tds': 130,
         'water_recovery':0.5,
         'grid_frac_heat':0.5,
-        'heat_price':0.00894,
+        'heat_price':0.0166,
         "electricity_price":0.04346,
         'dwi_lcow': 8.4,
-        'cst_cost_per_total_aperture_area':373,
+        'cst_cost_per_total_aperture_area':297,
         'cst_cost_per_storage_capital': 62,
+        'cost_per_land_area':4000
     }
 
 
@@ -78,9 +79,9 @@ if __name__ == "__main__":
     # Select sweep type
     #############################################################################################
     
-    sweep_type = "grid_frac_heat"
+    sweep_type = "cst_cost_per_storage_capital"
     only_plot = False
-    only_plot = True
+    # only_plot = True
 
     xcol_dict = {
         "water_recovery":"fs.water_recovery",
@@ -136,6 +137,7 @@ if __name__ == "__main__":
                 dwi_lcow=input_dict['dwi_lcow'],
                 cst_cost_per_total_aperture_area=input_dict['cst_cost_per_total_aperture_area'],
                 cst_cost_per_storage_capital=input_dict['cst_cost_per_storage_capital'],
+                cost_per_land_area = input_dict['cost_per_land_area'],
                 )
         
         results_dict_test = build_results_dict(m, skips=skips)
@@ -154,6 +156,7 @@ if __name__ == "__main__":
                 dwi_lcow=input_dict['dwi_lcow'],
                 cst_cost_per_total_aperture_area=input_dict['cst_cost_per_total_aperture_area'],
                 cst_cost_per_storage_capital=input_dict['cst_cost_per_storage_capital'],
+                cost_per_land_area = input_dict['cost_per_land_area'],
                 )
             
             results_dict_test = results_dict_append(m, results_dict_test)
