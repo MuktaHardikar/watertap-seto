@@ -49,23 +49,23 @@ if __name__ == "__main__":
 
     sweep_dict = {
     'water_recovery':np.linspace(0.3,0.8,6),
-    'heat_price': np.linspace(0.0083,0.02075,4),     # $/kwh
-    'grid_frac_heat':np.linspace(0.2,0.8,9),
-    'dwi_lcow':np.linspace(0.0294,0.073375,4),     # $/m3 treated water
-    'cost_per_area_collector':np.linspace(300,750,4),  # $/m2
-    'cost_per_volume_storage': np.linspace(1000,2500,4),    # $/m3
+    'heat_price': np.linspace(0.00447,0.01341,4),     # $/kwh
+    'grid_frac_heat':np.linspace(0.1,0.8,9),
+    'dwi_lcow':np.linspace(0.29,0.87,4),     # $/m3 treated water
+    'cost_per_area_collector':np.linspace(300,900,4),  # $/m2
+    'cost_per_volume_storage': np.linspace(1000,3000,4),    # $/m3
     
     }   
     
     input_dict = {
         'water_recovery':0.8,
-        'heat_price':0.0166,
+        'heat_price':0.00894,
         "electricity_price":0.04989,
         'grid_frac_heat':0.5,
         'hours_storage':24,
         'cost_per_area_collector':600,
         'cost_per_volume_storage':2000,
-        'dwi_lcow': 0.0587
+        'dwi_lcow': 0.58
     }
 
 
@@ -73,8 +73,11 @@ if __name__ == "__main__":
     # Select sweep type
     #############################################################################################
     
-    sweep_type = 'water_recovery'
-    treatment_only = True
+    sweep_type = 'cost_per_volume_storage'
+    if input_dict['grid_frac_heat']==1:
+        treatment_only = True
+    else:
+        treatment_only = False
     only_plot = False
     # only_plot = True
 
@@ -195,7 +198,7 @@ if __name__ == "__main__":
                 grid_frac = 'var'
 
             df = pd.DataFrame.from_dict(results_dict_test)
-            filename = "/Users/mhardika/Documents/watertap-seto/Mukta-Work/kbhdp-case-study-md/RPT3_sweep_results/kbhdp_RPT3_" + sweep_type + "_grid_frac_"+grid_frac+"_recovery_"+rec+"check.csv"
+            filename = "/Users/mhardika/Documents/watertap-seto/Mukta-Work/kbhdp-case-study-md/RPT3_sweep_results/kbhdp_RPT3_" + sweep_type + "_grid_frac_"+grid_frac+"_recovery_"+rec+".csv"
             df.to_csv(filename)
 
             plot_case_study(df, xcol=xcol_dict[sweep_type],ax_dict=ax_dict[sweep_type],costing_blk=costing_blk)
