@@ -41,7 +41,7 @@ Permian_ST2_diff_analysis:
       relative_lb: -0.01
       relative_ub: -0.01
       group: Cost
-      y_convert: 1
+      y_convert: 1 
       num_samples: 1
     Aluminum Cost:
       diff_mode: percentile
