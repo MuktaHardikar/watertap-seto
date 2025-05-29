@@ -76,7 +76,7 @@ def run_diff_sweep(case, case_name=None, diff_yaml_file=None):
         save_name="diff_sweep",
         saving_dir=save_dir,
         execute_simulations=True,
-        number_of_subprocesses=8,
+        number_of_subprocesses=4,
     )
     end_time = time.time()
     elapsed_time = end_time - start_time

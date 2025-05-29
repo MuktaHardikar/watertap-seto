@@ -54,7 +54,7 @@ if __name__ == "__main__":
 
     sweep_dict = {
     'water_recovery':np.linspace(0.35,0.5,4),
-    'heat_price':np.linspace(0.02875,0.08625,4),     # $/kwh
+    'heat_price':np.linspace(0.0083,0.0249,4),     # $/kwh
     'grid_frac_heat':np.linspace(0.5,0.9,5),
     'dwi_lcow':np.linspace(4.2,12.6,4),     # $/m3 treated water
     'cst_cost_per_total_aperture_area':np.linspace(148.5,445.5,4),
@@ -79,7 +79,7 @@ if __name__ == "__main__":
     # Select sweep type
     #############################################################################################
     
-    sweep_type = "cst_cost_per_storage_capital"
+    sweep_type = "heat_price"
     only_plot = False
     # only_plot = True
 

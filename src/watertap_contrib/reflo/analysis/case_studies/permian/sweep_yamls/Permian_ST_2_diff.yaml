@@ -10,17 +10,6 @@ Permian_ST2_diff_analysis:
     cst_cost_per_total_aperture_area: 297
     cst_cost_per_storage_capital: 62
   diff_param_loop:
-    Injection Cost:
-      diff_mode: percentile
-      diff_sample_type: UniformSample
-      param: fs.treatment.costing.deep_well_injection.dwi_lcow
-      nominal_lb: 4.20
-      nominal_ub: 12.6
-      relative_lb: -0.01
-      relative_ub: -0.01
-      group: Cost
-      y_convert: 1
-      num_samples: 5
     Heat Price:
       diff_mode: percentile
       diff_sample_type: UniformSample
@@ -31,7 +20,7 @@ Permian_ST2_diff_analysis:
       relative_ub: -0.01
       group: Cost
       y_convert: 1
-      num_samples: 5
+      num_samples: 1
     CST Collector Cost:
       diff_mode: percentile
       diff_sample_type: UniformSample
@@ -42,18 +31,7 @@ Permian_ST2_diff_analysis:
       relative_ub: -0.01
       group: Cost
       y_convert: 1
-      num_samples: 5
-    # CST Land Cost:
-    #   diff_mode: percentile
-    #   diff_sample_type: UniformSample
-    #   param: fs.energy.costing.trough_surrogate.cost_per_land_area
-    #   nominal_lb: 5000.0
-    #   nominal_ub: 12500.0
-    #   relative_lb: -0.01
-    #   relative_ub: -0.01
-    #   group: Cost
-    #   y_convert: 1
-    #   num_samples: 5
+      num_samples: 1
     Thermal Storage Cost:
       diff_mode: percentile
       diff_sample_type: UniformSample
@@ -64,7 +42,7 @@ Permian_ST2_diff_analysis:
       relative_ub: -0.01
       group: Cost
       y_convert: 1
-      num_samples: 5
+      num_samples: 1
     Aluminum Cost:
       diff_mode: percentile
       diff_sample_type: UniformSample
@@ -75,46 +53,63 @@ Permian_ST2_diff_analysis:
       relative_ub: -0.01
       group: Cost
       y_convert: 1
-      num_samples: 5
-    # EC Current Efficiency:
-    #   diff_mode: percentile
-    #   diff_sample_type: UniformSample
-    #   param: fs.treatment.EC.unit.current_efficiency
-    #   nominal_lb: 0.9
-    #   nominal_ub: 1.8
-    #   relative_lb: 0.01
-    #   relative_ub: 0.01
-    #   group: Performance
-    #   y_convert: -1
-    #   num_samples: 5
+      num_samples: 1
+    EC Current Efficiency:
+      diff_mode: percentile
+      diff_sample_type: UniformSample
+      param: fs.treatment.EC.unit.current_efficiency
+      nominal_lb: 1.0
+      nominal_ub: 1.8
+      relative_lb: 0.01
+      relative_ub: 0.01
+      group: Performance
+      y_convert: -1
+      num_samples: 1
+    EC Metal Dose:
+      diff_mode: percentile
+      diff_sample_type: UniformSample
+      param: fs.treatment.EC.unit.metal_dose
+      nominal_lb: 0.0005
+      nominal_ub: 0.0015
+      relative_lb: -0.01
+      relative_ub: -0.01
+      group: Performance
+      y_convert: 1
+      num_samples: 1
     MD Membrane Cost:
       diff_mode: percentile
       diff_sample_type: UniformSample
       param: fs.treatment.costing.vagmd_surrogate.membrane_cost
       nominal_lb: 45.0
-      nominal_ub: 135
+      nominal_ub: 135.0
       relative_lb: -0.01
       relative_ub: -0.01
       group: Cost
       y_convert: 1
-      num_samples: 5
+      num_samples: 1
     MD Module Cost:
       diff_mode: percentile
       diff_sample_type: UniformSample
       param: fs.treatment.costing.vagmd_surrogate.base_module_cost
       nominal_lb: 1170.0
-      nominal_ub: 3510
+      nominal_ub: 3510.0
       relative_lb: -0.01
       relative_ub: -0.01
       group: Cost
       y_convert: 1
-      num_samples: 5
+      num_samples: 1
+    Crystallizer HX Capital Cost:
+      diff_mode: percentile
+      diff_sample_type: UniformSample
+      param: fs.treatment.costing.multi_effect_crystallizer.heat_exchanger_capital_factor
+      nominal_lb: 210.0
+      nominal_ub: 630.0
+      relative_lb: -0.01
+      relative_ub: -0.01
+      group: Cost
+      y_convert: 1
+      num_samples: 1
     sweep_reference_params: # The parameters below will be used to generate reference design and will be run simultaneously (e.g. all of them will be changed to generate a new hypothetical design here, we only provide one parameter, membrane cost, but could provide many others)
-      Injection Cost:
-        type: UniformSample
-        param: fs.treatment.costing.deep_well_injection.dwi_lcow
-        lower_limit: 4.20
-        upper_limit: 12.6
       Heat Price:
         type: UniformSample
         param: fs.costing.heat_cost_buy
@@ -125,39 +120,39 @@ Permian_ST2_diff_analysis:
         param: fs.energy.costing.trough_surrogate.cost_per_total_aperture_area
         lower_limit: 148.5
         upper_limit: 445.5
-      # CST Land Cost:
-      #   type: UniformSample
-      #   param: fs.energy.costing.trough_surrogate.cost_per_land_area
-      #   lower_limit: 5000.0
-      #   upper_limit: 12500.0
       Thermal Storage Cost:
         type: UniformSample
         param: fs.energy.costing.trough_surrogate.cost_per_storage_capital
-        lower_limit: 31
-        upper_limit: 93
+        lower_limit: 31.0
+        upper_limit: 93.0
       Aluminum Cost:
         type: UniformSample
         param: fs.treatment.costing.aluminum_cost
         lower_limit: 1.115
         upper_limit: 3.345
-      # EC Current Efficiency:
-      #   type: UniformSample
-      #   param: fs.treatment.EC.unit.current_efficiency
-      #   lower_limit: 0.9
-      #   upper_limit: 1.8
+      EC Current Efficiency:
+        type: UniformSample
+        param: fs.treatment.EC.unit.current_efficiency
+        lower_limit: 1.0
+        upper_limit: 1.8
+      EC Metal Dose:
+        type: UniformSample
+        param: fs.treatment.EC.unit.metal_dose
+        lower_limit: 0.0005
+        upper_limit: 0.0015
       MD Membrane Cost:
         type: UniformSample
         param: fs.treatment.costing.vagmd_surrogate.membrane_cost
         lower_limit: 45.0
-        upper_limit: 135
+        upper_limit: 135.0
       MD Module Cost:
         type: UniformSample
         param: fs.treatment.costing.vagmd_surrogate.base_module_cost
         lower_limit: 1170.0
-        upper_limit: 3510
-      # EC Metal Dose:
-      #   type: UniformSample
-      #   param: fs.treatment.EC.unit.metal_dose
-      #   lower_limit: 0.0005
-      #   upper_limit: 0.00125
+        upper_limit: 3510.0
+      Crystallizer HX Capital Cost:
+        type: UniformSample
+        param: fs.treatment.costing.multi_effect_crystallizer.heat_exchanger_capital_factor
+        lower_limit: 210.0
+        upper_limit: 630.0
       num_samples: 10

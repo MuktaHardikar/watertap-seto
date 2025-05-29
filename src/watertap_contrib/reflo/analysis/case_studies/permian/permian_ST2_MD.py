@@ -1003,7 +1003,7 @@ def sweep_feed_flow_salinity():
     "heat_transfer_coefficient": 0.13
     }
 
-    heat_price = 0.00894
+    heat_price = 0.0166
     electricity_price = 0.04346
 
     sweep_dict = {
@@ -1015,12 +1015,12 @@ def sweep_feed_flow_salinity():
 def build_sweep(
     Qin=5,
     tds=130,
-    water_recovery=0.485,
+    water_recovery=0.5,
     grid_frac_heat=0.5,
-    heat_price=0.00894,
+    heat_price=0.0166,
     electricity_price=0.04346,
-    nacl_recovery_price = -0.024,
-    cst_cost_per_total_aperture_area=373,
+    nacl_recovery_price = 0,
+    cst_cost_per_total_aperture_area=297,
     cst_cost_per_storage_capital=62,
     cost_per_land_area = 4000
     
