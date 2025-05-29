@@ -50,7 +50,7 @@ if __name__ == "__main__":
     sweep_dict = {
     'water_recovery':np.linspace(0.3,0.8,6),
     'heat_price': np.linspace(0.00447,0.01341,4),     # $/kwh
-    'grid_frac_heat':np.linspace(0.1,0.8,9),
+    'grid_frac_heat':np.linspace(0.2,0.9,9),
     'dwi_lcow':np.linspace(0.29,0.87,4),     # $/m3 treated water
     'cost_per_area_collector':np.linspace(300,900,4),  # $/m2
     'cost_per_volume_storage': np.linspace(1000,3000,4),    # $/m3
@@ -73,13 +73,13 @@ if __name__ == "__main__":
     # Select sweep type
     #############################################################################################
     
-    sweep_type = 'cost_per_volume_storage'
+    sweep_type = 'grid_frac_heat'
     if input_dict['grid_frac_heat']==1:
         treatment_only = True
     else:
         treatment_only = False
     only_plot = False
-    # only_plot = True
+    only_plot = True
 
     xcol_dict = {
         "water_recovery":"fs.water_recovery",
@@ -217,6 +217,11 @@ if __name__ == "__main__":
             grid_frac = str(input_dict['grid_frac_heat'])
         else:
             grid_frac = 'var'
+
+        if treatment_only == True:
+            costing_blk = "fs.treatment.costing"
+        else:
+            costing_blk = "fs.costing"
 
         filename = "/Users/mhardika/Documents/watertap-seto/Mukta-Work/kbhdp-case-study-md/RPT3_sweep_results/kbhdp_RPT3_"+ sweep_type + "_grid_frac_" + grid_frac + "_recovery_" + rec + ".csv" 
         # # filename = "/Users/mhardika/Documents/watertap-seto/Mukta-Work/kbhdp-case-study-md/RPT3_sweep_results//"+ sweep_type + ".csv" 

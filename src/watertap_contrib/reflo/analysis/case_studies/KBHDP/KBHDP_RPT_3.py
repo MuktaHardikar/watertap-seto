@@ -542,24 +542,24 @@ def print_results_summary(m):
 
 if __name__ == "__main__":
 
-    # m = main(
-    #     water_recovery=0.8,
-    #     heat_price=0.0166,
-    #     electricity_price=0.04989,
-    #     grid_frac_heat=0.2,
-    #     hours_storage=24,
-    #     cost_per_area_collector=600,
-    #     cost_per_volume_storage=2000,
-    #     dwi_lcow = 0.0587
-    #     )
+    m = main(
+        water_recovery=0.8,
+        heat_price = 0.00894,
+        electricity_price=0.04989,
+        grid_frac_heat=0.15,
+        hours_storage=24,
+        cost_per_area_collector=600,
+        cost_per_volume_storage=2000,
+        dwi_lcow = 0.58
+        )
     # print_results_summary(m)
     
-    m = main_treatment(
-        water_recovery=0.8,
-        heat_price=0.0166,
-        electricity_price=0.04989,
-        dwi_lcow=0.0587
-    )
+    # m = main_treatment(
+    #     water_recovery=0.8,
+    #     heat_price=0.00894,
+    #     electricity_price=0.04989,
+    #     dwi_lcow=0.58
+    # )
 
     feed_m3h = pyunits.convert(
         m.fs.treatment.feed.properties[0].flow_vol_phase["Liq"], to_units=pyunits.m**3 / pyunits.h
