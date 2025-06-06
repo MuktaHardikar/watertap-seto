@@ -53,12 +53,12 @@ def plot_case_study(df,xcol,ax_dict):
 if __name__ == "__main__":
 
     sweep_dict = {
-    'water_recovery':np.linspace(0.35,0.5,4),
-    'heat_price':np.linspace(0.0083,0.0249,4),     # $/kwh
-    'grid_frac_heat':np.linspace(0.5,0.9,5),
-    'dwi_lcow':np.linspace(4.2,12.6,4),     # $/m3 treated water
-    'cst_cost_per_total_aperture_area':np.linspace(148.5,445.5,4),
-    'cst_cost_per_storage_capital':np.linspace(31,93,4),
+    'water_recovery':np.linspace(0.35,0.5,5),
+    'heat_price':np.linspace(0.0083,0.0249,5),     # $/kwh
+    'grid_frac_heat':np.linspace(0.5,1.0,6),
+    'dwi_lcow':np.linspace(4.2,12.6,5),     # $/m3 treated water
+    'cst_cost_per_total_aperture_area':np.linspace(148.5,445.5,5),
+    'cst_cost_per_storage_capital':np.linspace(31,93,5),
     }   
     
     input_dict = {

@@ -1003,9 +1003,6 @@ def sweep_feed_flow_salinity():
     "heat_transfer_coefficient": 0.13
     }
 
-    heat_price = 0.0166
-    electricity_price = 0.04346
-
     sweep_dict = {
         'Qin':[1,5,9],
         'tds': [100,130,200],
@@ -1061,8 +1058,8 @@ def main():
 
     m = run_permian_st2_md(
                         Qin=5, 
-                        tds=200, 
-                        water_recovery = 0.23,   # Pretreatment + MD
+                        tds=130, 
+                        water_recovery = 0.5,   # Pretreatment + MD
                         grid_frac_heat = 1,
                         heat_price=heat_price, 
                         electricity_price=electricity_price, 
@@ -1076,7 +1073,6 @@ def main():
    
     print(f"DOF = {degrees_of_freedom(m)}")
 
-
     feed_m3h = pyunits.convert(
         m.fs.treatment.feed.properties[0].flow_vol, to_units=pyunits.m**3 / pyunits.h
     )
@@ -1085,17 +1081,29 @@ def main():
         m.fs.treatment.product.properties[0].flow_vol_phase["Liq"], to_units=pyunits.m**3 / pyunits.h
     )
     print("\nProduct flow in m3/h:",product_m3h())
-    
-    print("LCOW:",m.fs.treatment.costing.LCOW(),pyunits.get_units(m.fs.treatment.costing.LCOW))
-    print("SEC (electricity) in kWh/m3:",m.fs.treatment.costing.aggregate_flow_electricity()/product_m3h())
-    print("SEC (heat) in kWh/m3:",m.fs.treatment.costing.aggregate_flow_heat()/product_m3h())
-    print("System recovery (%):", product_m3h()/feed_m3h()*100)
-    print("Capex ($M):",m.fs.treatment.costing.total_capital_cost()/1e6, 
-          pyunits.get_units(m.fs.treatment.costing.total_capital_cost))
-    print("Opex ($M/yr):",m.fs.treatment.costing.total_operating_cost()/1e6, 
-          pyunits.get_units(m.fs.treatment.costing.total_operating_cost))
-    print('Electricity demand (MWh/year):',pyunits.convert(m.fs.treatment.costing.aggregate_flow_electricity,to_units=pyunits.MW*pyunits.h/pyunits.year)())
-    print('Heat demand (MWh/year):',pyunits.convert(m.fs.treatment.costing.aggregate_flow_heat,to_units=pyunits.MW*pyunits.h/pyunits.year)())
+    try: 
+        print("LCOT:",m.fs.costing.LCOT(),pyunits.get_units(m.fs.costing.LCOT))
+        print("SEC (electricity) in kWh/m3:",m.fs.costing.aggregate_flow_electricity()/product_m3h())
+        print("SEC (heat) in kWh/m3:",m.fs.costing.aggregate_flow_heat()/product_m3h())
+        print("System recovery (%):", product_m3h()/feed_m3h()*100)
+        print("Capex ($M):",m.fs.costing.total_capital_cost()/1e6, 
+            pyunits.get_units(m.fs.costing.total_capital_cost))
+        print("Opex ($M/yr):",m.fs.costing.total_operating_cost()/1e6, 
+            pyunits.get_units(m.fs.costing.total_operating_cost))
+        print('Electricity demand (MWh/year):',pyunits.convert(m.fs.costing.aggregate_flow_electricity,to_units=pyunits.MW*pyunits.h/pyunits.year)())
+        print('Heat demand (MWh/year):',pyunits.convert(m.fs.costing.aggregate_flow_heat,to_units=pyunits.MW*pyunits.h/pyunits.year)())
+
+    except:    
+        print("LCOW:",m.fs.treatment.costing.LCOW(),pyunits.get_units(m.fs.treatment.costing.LCOW))
+        print("SEC (electricity) in kWh/m3:",m.fs.treatment.costing.aggregate_flow_electricity()/product_m3h())
+        print("SEC (heat) in kWh/m3:",m.fs.treatment.costing.aggregate_flow_heat()/product_m3h())
+        print("System recovery (%):", product_m3h()/feed_m3h()*100)
+        print("Capex ($M):",m.fs.treatment.costing.total_capital_cost()/1e6, 
+            pyunits.get_units(m.fs.treatment.costing.total_capital_cost))
+        print("Opex ($M/yr):",m.fs.treatment.costing.total_operating_cost()/1e6, 
+            pyunits.get_units(m.fs.treatment.costing.total_operating_cost))
+        print('Electricity demand (MWh/year):',pyunits.convert(m.fs.treatment.costing.aggregate_flow_electricity,to_units=pyunits.MW*pyunits.h/pyunits.year)())
+        print('Heat demand (MWh/year):',pyunits.convert(m.fs.treatment.costing.aggregate_flow_heat,to_units=pyunits.MW*pyunits.h/pyunits.year)())
 
     print_results(m)
 
