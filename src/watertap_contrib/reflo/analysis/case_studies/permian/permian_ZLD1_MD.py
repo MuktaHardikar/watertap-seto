@@ -750,7 +750,7 @@ def solve(
         print(msg)
         return results
 
-def run_permian_st2_md(permian_cryst_config, Qin=5, tds=130, grid_frac_heat =0.5, 
+def run_permian_zld1_md(permian_cryst_config, Qin=5, tds=130, grid_frac_heat =0.5, 
                        water_recovery = 0.3, heat_price = 0.00894, electricity_price = 0.04346,
                        cost_per_total_aperture_area = 373, cost_per_storage_capital= 62, cost_per_land_area = 4000,
                        nacl_recovery_price = 0,**kwargs):
@@ -1029,7 +1029,7 @@ def build_sweep(
     "heat_transfer_coefficient": 0.13
     }
  
-    m = run_permian_st2_md(
+    m = run_permian_zld1_md(
         Qin=Qin,
         tds=tds,
         water_recovery = water_recovery,   # Pretreatment + MD
@@ -1056,7 +1056,7 @@ def main():
     heat_price = 0.0166
     electricity_price = 0.04346  # Updated 0.0575 in USD 2023 to USD 2018
 
-    m = run_permian_st2_md(
+    m = run_permian_zld1_md(
                         Qin=5, 
                         tds=130, 
                         water_recovery = 0.5,   # Pretreatment + MD

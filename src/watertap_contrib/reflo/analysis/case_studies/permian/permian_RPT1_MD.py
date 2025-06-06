@@ -664,7 +664,7 @@ def solve(
         return results
 
 
-def run_permian_st1_md(Qin=5, tds=130, grid_frac_heat = 0.5, water_recovery = 0.3, 
+def run_permian_rpt1_md(Qin=5, tds=130, grid_frac_heat = 0.5, water_recovery = 0.3, 
                        heat_price=0.00894, electricity_price=0.0575, dwi_lcow = 8.4,
                        cst_cost_per_total_aperture_area=373,cst_cost_per_storage_capital=62,
                        cost_per_land_area=4000,  **kwargs):
@@ -956,7 +956,7 @@ def main():
     heat_price = 0.0166
     electricity_price = 0.04346  # Updated 0.0575 in USD 2018 to USD 2023
 
-    m = run_permian_st1_md(
+    m = run_permian_rpt1_md(
         Qin = 5, 
         tds = 130, 
         water_recovery = 0.5,   # Pretreatment + MD

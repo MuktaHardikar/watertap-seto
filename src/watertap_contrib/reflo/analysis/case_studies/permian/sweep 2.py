@@ -3,8 +3,8 @@ import time
 from parameter_sweep.loop_tool.loop_tool import loopTool, get_working_dir
 from watertap.core.solvers import get_solver
 
-import watertap_contrib.reflo.analysis.case_studies.permian.permian_ST1_MD as ST1
-import watertap_contrib.reflo.analysis.case_studies.permian.permian_ST2_MD as ST2
+import watertap_contrib.reflo.analysis.case_studies.permian.permian_RPT1_MD as ST1
+import watertap_contrib.reflo.analysis.case_studies.permian.permian_ZLD1_MD as ST2
 
 filepath = os.path.abspath(__file__)
 parent_dir = os.path.dirname(filepath)
