@@ -54,15 +54,7 @@ from watertap.core.util.model_diagnostics.infeasible import *
 from watertap.core.util.initialization import *
 
 from watertap_contrib.reflo.costing import TreatmentCosting,  EnergyCosting, REFLOSystemCosting
-from watertap_contrib.reflo.analysis.case_studies.permian.components import *
 from watertap_contrib.reflo.analysis.case_studies.permian import *
-from watertap_contrib.reflo.analysis.case_studies.permian.components.MD import *
-from watertap_contrib.reflo.analysis.case_studies.permian.components.translator_zo_to_nacl import *
-from watertap_contrib.reflo.analysis.case_studies.permian.components.translator_sw_to_nacl import *
-from watertap_contrib.reflo.analysis.case_studies.permian.components.normalizer_cryst import *
-from watertap_contrib.reflo.analysis.case_studies.permian.components.denormalizer_cryst import *
-from watertap_contrib.reflo.analysis.case_studies.permian.components.multi_effect_crystallizer import *
-from watertap_contrib.reflo.analysis.case_studies.permian.components.CST import *
 
 reflo_dir = pathlib.Path(__file__).resolve().parents[3]
 case_study_yaml = f"{reflo_dir}/data/technoeconomic/permian_case_study.yaml"
@@ -71,12 +63,12 @@ case_study_yaml = f"{reflo_dir}/data/technoeconomic/permian_case_study.yaml"
 solver = get_solver()
 
 __all__ = [
-    "build_permian_st2_md",
-    "set_operating_conditions_st2_md",
-    "add_costing_st2_md",
-    "set_permian_pretreatment_scaling_st2_md",
-    "init_system_st2_md",
-    "run_permian_st2_md",
+    "build_permian_zld1_md",
+    "set_operating_conditions_zld1_md",
+    "add_costing_zld1_md",
+    "set_permian_pretreatment_scaling_zld1_md",
+    "init_system_zld1_md",
+    "run_permian_zld1_md",
 ]
 
 
@@ -111,7 +103,7 @@ def get_stream_density(Qin=5, tds=130, **kwargs):
     return rho
 
 
-def build_permian_st2_md(Qin=5, Q_md=0.22478, Cin=118, water_recovery=0.2, pretreatment_system_recovery=0.9,rho=None):
+def build_permian_zld1_md(Qin=5, Q_md=0.22478, Cin=118, water_recovery=0.2, pretreatment_system_recovery=0.9,rho=None):
     """
     Build Permian pretreatment flowsheet
     """
@@ -180,10 +172,10 @@ def build_permian_st2_md(Qin=5, Q_md=0.22478, Cin=118, water_recovery=0.2, pretr
         momentum_mixing_type=MomentumMixingType.none,
     )
 
-    treat.norm_feed = Normalizer_Cryst(
-        inlet_property_package = m.fs.properties_NaCl,
-        outlet_property_package= m.fs.properties_NaCl,
-    )
+    # treat.norm_feed = Normalizer_Cryst(
+    #     inlet_property_package = m.fs.properties_NaCl,
+    #     outlet_property_package= m.fs.properties_NaCl,
+    # )
 
     treat.chem_addition = FlowsheetBlock(dynamic=False)
     build_chem_addition(m, treat.chem_addition)
@@ -259,9 +251,9 @@ def build_permian_st2_md(Qin=5, Q_md=0.22478, Cin=118, water_recovery=0.2, pretr
         destination=treat.disposal_NaCl_mixer.md_disposal,
     )
 
-    treat.mixer_to_normalized_feed = Arc(
-        source=treat.disposal_NaCl_mixer.outlet, destination=treat.norm_feed.inlet,
-    )
+    # treat.mixer_to_normalized_feed = Arc(
+    #     source=treat.disposal_NaCl_mixer.outlet, destination=treat.norm_feed.inlet,
+    # )
 
     TransformationFactory("network.expand_arcs").apply_to(m)
 
@@ -270,7 +262,7 @@ def build_permian_st2_md(Qin=5, Q_md=0.22478, Cin=118, water_recovery=0.2, pretr
 
     return m
 
-def build_energy_permian_st2_md(m):
+def build_energy_permian_zld1_md(m):
     # Build energy block
     m.fs.energy = energy = Block()
     m.fs.energy.cst = FlowsheetBlock()
@@ -283,7 +275,7 @@ def build_energy_permian_st2_md(m):
     return m
 
 
-def set_operating_conditions_st2_md(m, rho, Qin=5, tds=130, **kwargs):
+def set_operating_conditions_zld1_md(m, rho, Qin=5, tds=130, **kwargs):
 
     global flow_mass_water, flow_mass_tds, flow_in
 
@@ -305,11 +297,11 @@ def set_operating_conditions_st2_md(m, rho, Qin=5, tds=130, **kwargs):
     set_cart_filt_op_conditions(m, m.fs.treatment.cart_filt)
 
 
-def set_energy_operating_conditions_st2_md(m,heat_load=10,hours_storage=24):
+def set_energy_operating_conditions_zld1_md(m,heat_load=10,hours_storage=24):
     set_cst_op_conditions(m.fs.energy.cst, heat_load, hours_storage)
 
 
-def add_treatment_costing_st2_md(m,heat_price=0.018, electricity_price=0.0626):
+def add_treatment_costing_zld1_md(m,heat_price=0.018, electricity_price=0.0626):
 
     m.fs.treatment.costing = TreatmentCosting(case_study_definition=case_study_yaml)
 
@@ -334,7 +326,7 @@ def add_treatment_costing_st2_md(m,heat_price=0.018, electricity_price=0.0626):
     m.fs.treatment.costing.initialize()
 
 
-def add_system_costing_st2_md(m,heat_price=0.018, electricity_price=0.0626):
+def add_system_costing_zld1_md(m,heat_price=0.018, electricity_price=0.0626):
 
     m.fs.treatment.costing = TreatmentCosting(case_study_definition=case_study_yaml)
     add_chem_addition_costing(
@@ -376,7 +368,7 @@ def add_system_costing_st2_md(m,heat_price=0.018, electricity_price=0.0626):
     m.fs.costing.add_LCOT(m.fs.treatment.product.properties[0].flow_vol)
     
 
-def set_permian_pretreatment_scaling_st2_md(
+def set_permian_pretreatment_scaling_zld1_md(
     m, calculate_m_scaling_factors=False, **kwargs
 ):
 
@@ -414,27 +406,27 @@ def set_permian_pretreatment_scaling_st2_md(
 
     set_ec_scaling(m, m.fs.treatment.EC, calc_blk_scaling_factors=True)
 
-    # SW to NaCl product tranlator 
-    set_scaling_factor(
-        m.fs.treatment.sw_to_nacl_product.properties_out[0].flow_mass_phase_comp[
-            "Liq", "H2O"
-        ],
-        1e-2,
-    )
+    # SW to NaCl product translator 
+    # set_scaling_factor(
+    #     m.fs.treatment.sw_to_nacl_product.properties_out[0].flow_mass_phase_comp[
+    #         "Liq", "H2O"
+    #     ],
+    #     1e-2,
+    # )
 
     # ZO to SW feed translator
-    set_scaling_factor(
-        m.fs.treatment.zo_to_sw_feed.properties_out[0].flow_mass_phase_comp[
-            "Liq", "H2O"
-        ],
-        1e-2,
-    )
-    set_scaling_factor(
-        m.fs.treatment.zo_to_sw_feed.properties_out[0].flow_mass_phase_comp[
-            "Liq", "TDS"
-        ],
-        0.1,
-    )
+    # set_scaling_factor(
+    #     m.fs.treatment.zo_to_sw_feed.properties_out[0].flow_mass_phase_comp[
+    #         "Liq", "H2O"
+    #     ],
+    #     1e-2,
+    # )
+    # set_scaling_factor(
+    #     m.fs.treatment.zo_to_sw_feed.properties_out[0].flow_mass_phase_comp[
+    #         "Liq", "TDS"
+    #     ],
+    #     0.1,
+    # )
 
 
     # ZO to NaCl disposal translator
@@ -514,58 +506,58 @@ def set_permian_pretreatment_scaling_st2_md(
     #     10,
     # )
 
-    # set_scaling_factor(
-    #     m.fs.treatment.disposal_NaCl_mixer.md_disposal_state[0].flow_mass_phase_comp[
-    #         "Liq", "H2O"
-    #     ],
-    #     1e-3,
-    # )
-    # set_scaling_factor(
-    #     m.fs.treatment.disposal_NaCl_mixer.md_disposal_state[0].flow_mass_phase_comp[
-    #         "Liq", "NaCl"
-    #     ],
-    #     1e-2,
-    # )
-    # set_scaling_factor(
-    #     m.fs.treatment.disposal_NaCl_mixer.md_disposal_state[0].flow_mass_phase_comp[
-    #         "Sol", "NaCl"
-    #     ],
-    #     1e-2,
-    # )
+    set_scaling_factor(
+        m.fs.treatment.disposal_NaCl_mixer.md_disposal_state[0].flow_mass_phase_comp[
+            "Liq", "H2O"
+        ],
+        1e-3,
+    )
+    set_scaling_factor(
+        m.fs.treatment.disposal_NaCl_mixer.md_disposal_state[0].flow_mass_phase_comp[
+            "Liq", "NaCl"
+        ],
+        1e-2,
+    )
+    set_scaling_factor(
+        m.fs.treatment.disposal_NaCl_mixer.md_disposal_state[0].flow_mass_phase_comp[
+            "Sol", "NaCl"
+        ],
+        1e-2,
+    )
 
-    # # mixed state outlet
-    # set_scaling_factor(
-    #     m.fs.treatment.disposal_NaCl_mixer.mixed_state[0].flow_mass_phase_comp[
-    #         "Liq", "H2O"
-    #     ],
-    #     1e-1,
-    # )
+    # mixed state outlet
+    set_scaling_factor(
+        m.fs.treatment.disposal_NaCl_mixer.mixed_state[0].flow_mass_phase_comp[
+            "Liq", "H2O"
+        ],
+        1e-1,
+    )
     set_scaling_factor(
         m.fs.treatment.disposal_NaCl_mixer.mixed_state[0].flow_mass_phase_comp[
             "Vap", "H2O"
         ],
         1e-2,
     )
-    # set_scaling_factor(
-    #     m.fs.treatment.disposal_NaCl_mixer.mixed_state[0].flow_mass_phase_comp[
-    #         "Liq", "NaCl"
-    #     ],
-    #     1e-2,
-    # )
+    set_scaling_factor(
+        m.fs.treatment.disposal_NaCl_mixer.mixed_state[0].flow_mass_phase_comp[
+            "Liq", "NaCl"
+        ],
+        1e-2,
+    )
 
-    # set_scaling_factor(
-    #     m.fs.treatment.disposal_NaCl_mixer.mixed_state[0].flow_mass_phase_comp[
-    #         "Sol", "NaCl"
-    #     ],
-    #     10,
-    # )
+    set_scaling_factor(
+        m.fs.treatment.disposal_NaCl_mixer.mixed_state[0].flow_mass_phase_comp[
+            "Sol", "NaCl"
+        ],
+        10,
+    )
 
     if calculate_m_scaling_factors:
         print("calclate_m_scaling_factors\n\n\n")
         calculate_scaling_factors(m)
 
 
-def init_system_st2_md(m, **kwargs):
+def init_system_zld1_md(m, **kwargs):
 
     treat = m.fs.treatment
 
@@ -615,65 +607,83 @@ def init_system_st2_md(m, **kwargs):
     treat.disposal_NaCl_mixer.initialize()
     treat.disposal_NaCl_mixer.mixed_state[0].temperature.fix(300)
     treat.disposal_NaCl_mixer.mixed_state[0].pressure.fix(101325)
+    # propagate_state(treat.mixer_to_normalized_feed)
 
-    propagate_state(treat.mixer_to_normalized_feed)
 
-
-def init_energy_system_st2_md(m):
+def init_energy_system_zld1_md(m):
     init_cst(m.fs.energy.cst)
 
-def add_mec_st2_md(m,permian_cryst_config):
+def add_mec_zld1_md(m,permian_cryst_config):
 
     treat = m.fs.treatment
 
     print("\n--------- Adding MEC---------\n")
     treat.mec = FlowsheetBlock(dynamic=False)
-    build_mec(m, treat.mec, 
-              prop_package = m.fs.properties_NaCl,
-              prop_package_vapor = m.fs.properties_vapor
+
+    build_mec(m, 
+              treat.mec, 
+            #   prop_package = m.fs.properties_NaCl,
+            #   prop_package_vapor = m.fs.properties_vapor
             )
     
+    total_feed_H2O_mass = treat.disposal_NaCl_mixer.outlet.flow_mass_phase_comp[
+        0, "Liq", "H2O"
+    ].value
+    total_feed_NaCl_mass = treat.disposal_NaCl_mixer.outlet.flow_mass_phase_comp[
+        0, "Liq", "NaCl"
+    ].value
+
     set_mec_op_conditions(
                             m, 
                             treat.mec,
                             operating_pressures=permian_cryst_config["operating_pressures"],
+                            feed_H2O=total_feed_H2O_mass,
+                            feed_NaCl=total_feed_NaCl_mass,
                             nacl_yield=permian_cryst_config["nacl_yield"],
-                            heat_transfer_coefficient = permian_cryst_config["heat_transfer_coefficient"],
+                            heat_transfer_coeff = permian_cryst_config["heat_transfer_coefficient"],   
                         )
     
-    init_mec(m, treat.mec)
-
+    init_mec(treat.mec)
     unfix_mec(treat.mec)
 
-    treat.cryst_feed_H2O_constraint = Constraint(
-    expr = treat.mec.unit.inlet.flow_mass_phase_comp[0, "Liq", "H2O"]
-        == treat.norm_feed.outlet.flow_mass_phase_comp[0, "Liq", "H2O"]
-    )
-    treat.cryst_feed_NaCl_constraint = Constraint(
-    expr = treat.mec.unit.inlet.flow_mass_phase_comp[0, "Liq", "NaCl"]
-        == treat.norm_feed.outlet.flow_mass_phase_comp[0, "Liq", "NaCl"]
-    )
-    treat.cryst_feed_temp_constraint = Constraint(
-    expr = treat.mec.unit.inlet.temperature[0]
-        == treat.norm_feed.outlet.temperature[0]
-    )
-    treat.cryst_feed_pressure_constraint = Constraint(
-    expr = treat.mec.unit.inlet.pressure[0]
-        == treat.norm_feed.outlet.pressure[0]
+    treat.mec.unit.inlet.flow_mass_phase_comp[0, "Liq", "H2O"].fix(treat.disposal_NaCl_mixer.outlet.flow_mass_phase_comp[0, "Liq", "H2O"]())
+    treat.mec.unit.inlet.flow_mass_phase_comp[0, "Liq", "NaCl"].fix(treat.disposal_NaCl_mixer.outlet.flow_mass_phase_comp[0, "Liq", "NaCl"]())
+
+    treat.mec.unit.inlet.temperature[0].fix(treat.disposal_NaCl_mixer.outlet.temperature[0].value)
+    treat.mec.unit.inlet.pressure[0].fix(101325)
+
+    # treat.cryst_feed_H2O_constraint = Constraint(
+    # expr = treat.mec.unit.inlet.flow_mass_phase_comp[0, "Liq", "H2O"]
+    #     == treat.disposal_NaCl_mixer.outlet.flow_mass_phase_comp[0, "Liq", "H2O"]
+    # )
+    # treat.cryst_feed_NaCl_constraint = Constraint(
+    # expr = treat.mec.unit.inlet.flow_mass_phase_comp[0, "Liq", "NaCl"]
+    #     == treat.disposal_NaCl_mixer.outlet.flow_mass_phase_comp[0, "Liq", "NaCl"]
+    # )
+    # treat.cryst_feed_temp_constraint = Constraint(
+    # expr = treat.mec.unit.inlet.temperature[0]
+    #     == treat.disposal_NaCl_mixer.outlet.temperature[0]
+    # )
+    # treat.cryst_feed_pressure_constraint = Constraint(
+    # expr = treat.mec.unit.inlet.pressure[0]
+    #     == treat.disposal_NaCl_mixer.outlet.pressure[0]
+    # )
+
+    # print("Water",treat.norm_feed.outlet.flow_mass_phase_comp[0, "Liq", "H2O"]())
+    # print("Nacl",treat.norm_feed.outlet.flow_mass_phase_comp[0, "Liq", "NaCl"]())
+    # print("Temp",treat.norm_feed.outlet.temperature[0]())
+    # print("Pressure",treat.norm_feed.outlet.pressure[0]())
+
+    mec_rescaling(
+        m.fs.treatment.mec,
+        flow_mass_phase_water_total=total_feed_H2O_mass,
+        flow_mass_phase_salt_total=total_feed_NaCl_mass,
     )
 
-    print("Water",treat.norm_feed.outlet.flow_mass_phase_comp[0, "Liq", "H2O"]())
-    print("Nacl",treat.norm_feed.outlet.flow_mass_phase_comp[0, "Liq", "NaCl"]())
-    print("Temp",treat.norm_feed.outlet.temperature[0]())
-    print("Pressure",treat.norm_feed.outlet.pressure[0]())
-
-    mec_rescaling(m.fs,
-                  flow_mass_phase_water_total = treat.norm_feed.outlet.flow_mass_phase_comp[0, "Liq", "H2O"]())
-
-    treat.denorm_cryst_product = Denormalizer_Cryst(
-        inlet_property_package = m.fs.properties_NaCl,
-        outlet_property_package= m.fs.properties_NaCl,
-    )
+    # treat.denorm_cryst_product = Denormalizer_Cryst(
+    #     inlet_property_package = m.fs.properties_NaCl,
+    #     outlet_property_package= m.fs.properties_NaCl,
+    # )
 
     treat.product_NaCl_mixer = Mixer(
         property_package=m.fs.properties_NaCl,
@@ -686,14 +696,14 @@ def add_mec_st2_md(m,permian_cryst_config):
 
     treat.product = Product(property_package=m.fs.properties_NaCl)
 
-    treat.cryst_product_to_denomalizer = Arc(
-        source=treat.mec.unit.outlet, destination=treat.denorm_cryst_product.inlet,
-    ) # (8)
+    # treat.cryst_product_to_denomalizer = Arc(
+    #     source=treat.mec.unit.outlet, destination=treat.denorm_cryst_product.inlet,
+    # ) # (8)
     treat.md_translator_to_product_NaCl_mixer = Arc(
         source=treat.sw_to_nacl_product.outlet, destination=treat.product_NaCl_mixer.md_product,
     ) # (7)
-    treat.cryst_denomalizer_to_product_NaCl_mixer = Arc(
-        source=treat.denorm_cryst_product.outlet, destination=treat.product_NaCl_mixer.cryst_product,
+    treat.cryst_product_to_product_NaCl_mixer = Arc(
+        source=treat.mec.unit.outlet, destination=treat.product_NaCl_mixer.cryst_product,
     ) # (9)
     treat.product_NaCl_mixer_to_product = Arc(
         source=treat.product_NaCl_mixer.outlet, destination=treat.product.inlet,
@@ -705,19 +715,20 @@ def add_mec_st2_md(m,permian_cryst_config):
     treat.sw_to_nacl_product.outlet.flow_mass_phase_comp[0, "Sol", "NaCl"].fix(0)
     treat.sw_to_nacl_product.initialize()
     
-    propagate_state(treat.cryst_product_to_denomalizer)
-    treat.denorm_cryst_product.initialize()
+    # propagate_state(treat.cryst_product_to_denomalizer)
+    # treat.denorm_cryst_product.initialize()
     
     propagate_state(treat.md_translator_to_product_NaCl_mixer)
-    propagate_state(treat.cryst_denomalizer_to_product_NaCl_mixer)
+    propagate_state(treat.cryst_product_to_product_NaCl_mixer)
 
-    treat.product_NaCl_mixer.outlet.pressure[0].fix()
+    # treat.product_NaCl_mixer.outlet.pressure[0].fix()
     treat.product_NaCl_mixer.initialize()
     
     propagate_state(treat.product_NaCl_mixer_to_product)
 
     treat.product.properties[0].flow_vol
     treat.product.properties[0].flow_vol_phase
+    treat.product.pressure.fix(101325)
     treat.product.initialize()
 
 
@@ -750,7 +761,7 @@ def solve(
         print(msg)
         return results
 
-def run_permian_zld1_md(permian_cryst_config, Qin=5, tds=130, grid_frac_heat =0.5, 
+def run_permian_zld1_md(permian_cryst_config, Qin=5, tds=130, grid_frac_heat = 0.5, 
                        water_recovery = 0.3, heat_price = 0.00894, electricity_price = 0.04346,
                        cost_per_total_aperture_area = 373, cost_per_storage_capital= 62, cost_per_land_area = 4000,
                        nacl_recovery_price = 0,**kwargs):
@@ -783,16 +794,16 @@ def run_permian_zld1_md(permian_cryst_config, Qin=5, tds=130, grid_frac_heat =0.
     Pretreatment + MD flowsheet
     '''
 
-    m = build_permian_st2_md(Q_md=md_flow(), Cin=md_conc(), water_recovery=water_recovery, pretreatment_system_recovery=pretreatment_system_recovery, rho=rho)
+    m = build_permian_zld1_md(Q_md=md_flow(), Cin=md_conc(), water_recovery=water_recovery, pretreatment_system_recovery=pretreatment_system_recovery, rho=rho)
     treat = m.fs.treatment
 
-    set_operating_conditions_st2_md(m, rho, Qin, tds)
-    set_permian_pretreatment_scaling_st2_md(
+    set_operating_conditions_zld1_md(m, rho, Qin, tds)
+    set_permian_pretreatment_scaling_zld1_md(
         m, calculate_m_scaling_factors=True
     )  # Doesn't solve without this even before costing
 
     
-    init_system_st2_md(m)
+    init_system_zld1_md(m)
     print(f"DOF = {degrees_of_freedom(m)}")
 
     results = solve(m)
@@ -809,11 +820,13 @@ def run_permian_zld1_md(permian_cryst_config, Qin=5, tds=130, grid_frac_heat =0.
     Pretreatment + MD + MEC
     '''
 
-    add_mec_st2_md(m,permian_cryst_config)
+    add_mec_zld1_md(m,permian_cryst_config)
 
     print(f"DOF = {degrees_of_freedom(m)}")
 
     results = solve(m.fs.treatment.mec)
+    assert_optimal_termination(results)
+
     results = solve(m)
 
     print_infeasible_constraints(m)
@@ -823,7 +836,7 @@ def run_permian_zld1_md(permian_cryst_config, Qin=5, tds=130, grid_frac_heat =0.
     if grid_frac_heat == 1:
 
          # Add costing
-        add_treatment_costing_st2_md(m, heat_price, electricity_price)
+        add_treatment_costing_zld1_md(m, heat_price, electricity_price)
 
         print(f"DOF = {degrees_of_freedom(m)}")
 
@@ -831,9 +844,9 @@ def run_permian_zld1_md(permian_cryst_config, Qin=5, tds=130, grid_frac_heat =0.
 
 
     else:
-        build_energy_permian_st2_md(m)
-        set_energy_operating_conditions_st2_md(m)
-        init_energy_system_st2_md(m)
+        build_energy_permian_zld1_md(m)
+        set_energy_operating_conditions_zld1_md(m)
+        init_energy_system_zld1_md(m)
 
         print("\n--------- CST Inputs Completed ---------\n")
 
@@ -841,7 +854,7 @@ def run_permian_zld1_md(permian_cryst_config, Qin=5, tds=130, grid_frac_heat =0.
         print('CST Heat:', value(m.fs.energy.cst.unit.heat))
         print("\n")
             
-        add_system_costing_st2_md(m, heat_price, electricity_price)
+        add_system_costing_zld1_md(m, heat_price, electricity_price)
         add_cst_costing_scaling(m,m.fs.energy.cst.unit)
 
         results = solve(m)
@@ -1000,7 +1013,7 @@ def sweep_feed_flow_salinity():
     permian_cryst_config = {
     "operating_pressures": [0.45, 0.25, 0.208, 0.095], # Operating pressure of each effect (bar)
     "nacl_yield": 0.9, # Yield
-    "heat_transfer_coefficient": 0.13
+    "heat_transfer_coefficient": 1300
     }
 
     sweep_dict = {
@@ -1026,7 +1039,7 @@ def build_sweep(
     permian_cryst_config = {
     "operating_pressures": [0.45, 0.25, 0.208, 0.095], # Operating pressure of each effect (bar)
     "nacl_yield": 0.9, # Yield
-    "heat_transfer_coefficient": 0.13
+    "heat_transfer_coefficient": 1300
     }
  
     m = run_permian_zld1_md(
@@ -1050,7 +1063,7 @@ def main():
     permian_cryst_config = {
     "operating_pressures": [0.45, 0.25, 0.208, 0.095], # Operating pressure of each effect (bar)
     "nacl_yield": 0.9, # Yield
-    "heat_transfer_coefficient": 0.13
+    "heat_transfer_coefficient": 1300
     }
 
     heat_price = 0.0166
@@ -1059,8 +1072,8 @@ def main():
     m = run_permian_zld1_md(
                         Qin=5, 
                         tds=130, 
-                        water_recovery = 0.5,   # Pretreatment + MD
-                        grid_frac_heat = 1,
+                        water_recovery = 0.2,   # Pretreatment + MD
+                        grid_frac_heat = 0.5,
                         heat_price=heat_price, 
                         electricity_price=electricity_price, 
                         permian_cryst_config=permian_cryst_config,
