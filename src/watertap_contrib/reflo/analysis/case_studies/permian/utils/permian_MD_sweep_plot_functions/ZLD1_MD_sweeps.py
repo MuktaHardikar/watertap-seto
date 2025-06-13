@@ -77,7 +77,7 @@ if __name__ == "__main__":
     permian_cryst_config = {
         "operating_pressures": [0.45, 0.25, 0.208, 0.095], # Operating pressure of each effect (bar)
         "nacl_yield": 0.9, # Yield
-        "heat_transfer_coefficient": 0.13
+        "heat_transfer_coefficient": 1300
         }
 
 
@@ -85,7 +85,7 @@ if __name__ == "__main__":
     # Select sweep type
     #############################################################################################
     
-    sweep_type = "grid_frac_heat"
+    sweep_type = "cst_cost_per_storage_capital"
     only_plot = False
     # only_plot = True
     

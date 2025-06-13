@@ -650,7 +650,7 @@ def add_mec_zld1_md(m,permian_cryst_config):
     treat.mec.unit.inlet.flow_mass_phase_comp[0, "Liq", "NaCl"].fix(treat.disposal_NaCl_mixer.outlet.flow_mass_phase_comp[0, "Liq", "NaCl"]())
 
     treat.mec.unit.inlet.temperature[0].fix(treat.disposal_NaCl_mixer.outlet.temperature[0].value)
-    treat.mec.unit.inlet.pressure[0].fix(101325)
+    treat.mec.unit.inlet.pressure[0].fix(treat.disposal_NaCl_mixer.outlet.pressure[0].value)
 
     # treat.cryst_feed_H2O_constraint = Constraint(
     # expr = treat.mec.unit.inlet.flow_mass_phase_comp[0, "Liq", "H2O"]
@@ -680,34 +680,26 @@ def add_mec_zld1_md(m,permian_cryst_config):
         flow_mass_phase_salt_total=total_feed_NaCl_mass,
     )
 
-    # treat.denorm_cryst_product = Denormalizer_Cryst(
-    #     inlet_property_package = m.fs.properties_NaCl,
-    #     outlet_property_package= m.fs.properties_NaCl,
-    # )
-
     treat.product_NaCl_mixer = Mixer(
         property_package=m.fs.properties_NaCl,
         num_inlets=2,
         inlet_list=["md_product", "cryst_product"],
         material_balance_type=MaterialBalanceType.componentPhase,
-        energy_mixing_type=MixingType.extensive,
+        energy_mixing_type=MixingType.none,
         momentum_mixing_type=MomentumMixingType.none,
     )
 
     treat.product = Product(property_package=m.fs.properties_NaCl)
 
-    # treat.cryst_product_to_denomalizer = Arc(
-    #     source=treat.mec.unit.outlet, destination=treat.denorm_cryst_product.inlet,
-    # ) # (8)
     treat.md_translator_to_product_NaCl_mixer = Arc(
         source=treat.sw_to_nacl_product.outlet, destination=treat.product_NaCl_mixer.md_product,
-    ) # (7)
+    )
     treat.cryst_product_to_product_NaCl_mixer = Arc(
         source=treat.mec.unit.outlet, destination=treat.product_NaCl_mixer.cryst_product,
-    ) # (9)
+    )
     treat.product_NaCl_mixer_to_product = Arc(
         source=treat.product_NaCl_mixer.outlet, destination=treat.product.inlet,
-    ) # (10)
+    )
 
     TransformationFactory("network.expand_arcs").apply_to(m)
 
@@ -715,13 +707,10 @@ def add_mec_zld1_md(m,permian_cryst_config):
     treat.sw_to_nacl_product.outlet.flow_mass_phase_comp[0, "Sol", "NaCl"].fix(0)
     treat.sw_to_nacl_product.initialize()
     
-    # propagate_state(treat.cryst_product_to_denomalizer)
-    # treat.denorm_cryst_product.initialize()
-    
     propagate_state(treat.md_translator_to_product_NaCl_mixer)
     propagate_state(treat.cryst_product_to_product_NaCl_mixer)
 
-    # treat.product_NaCl_mixer.outlet.pressure[0].fix()
+    treat.product_NaCl_mixer.outlet.temperature[0].fix()
     treat.product_NaCl_mixer.initialize()
     
     propagate_state(treat.product_NaCl_mixer_to_product)
@@ -840,6 +829,24 @@ def run_permian_zld1_md(permian_cryst_config, Qin=5, tds=130, grid_frac_heat = 0
 
         print(f"DOF = {degrees_of_freedom(m)}")
 
+        feed_m3h = pyunits.convert(
+        m.fs.treatment.feed.properties[0].flow_vol, to_units=pyunits.m**3 / pyunits.h
+        )
+
+        m.fs.treatment.costing._add_flow_component_breakdowns(
+        "heat",
+        "SEC_th",
+        feed_m3h,
+        period=pyunits.hr 
+        )
+
+        m.fs.treatment.costing._add_flow_component_breakdowns(
+        "electricity",
+        "SEC_elec",
+        feed_m3h,
+        period=pyunits.hr 
+        )
+
         results = solve(m)
 
 
@@ -868,6 +875,24 @@ def run_permian_zld1_md(permian_cryst_config, Qin=5, tds=130, grid_frac_heat = 0
         m.fs.treatment.costing.nacl_recovered.cost.set_value(nacl_recovery_price)
 
         print(f"DOF = {degrees_of_freedom(m)}")
+
+        feed_m3h = pyunits.convert(
+        m.fs.treatment.feed.properties[0].flow_vol, to_units=pyunits.m**3 / pyunits.h
+    )
+
+        m.fs.treatment.costing._add_flow_component_breakdowns(
+        "heat",
+        "SEC_th",
+        feed_m3h,
+        period=pyunits.hr 
+        )
+
+        m.fs.treatment.costing._add_flow_component_breakdowns(
+        "electricity",
+        "SEC_elec",
+        feed_m3h,
+        period=pyunits.hr 
+        )
 
         results = solve(m)
 
@@ -1019,7 +1044,7 @@ def sweep_feed_flow_salinity():
     sweep_dict = {
         'Qin':[1,5,9],
         'tds': [100,130,200],
-        'recovery': [0.59,0.478,0.23]
+        'recovery': [0.59,0.477,0.23]
     }
 
 def build_sweep(
@@ -1070,9 +1095,9 @@ def main():
     electricity_price = 0.04346  # Updated 0.0575 in USD 2023 to USD 2018
 
     m = run_permian_zld1_md(
-                        Qin=5, 
-                        tds=130, 
-                        water_recovery = 0.2,   # Pretreatment + MD
+                        Qin = 5, 
+                        tds = 130, 
+                        water_recovery = 0.5,   # Pretreatment + MD
                         grid_frac_heat = 0.5,
                         heat_price=heat_price, 
                         electricity_price=electricity_price, 
@@ -1105,20 +1130,50 @@ def main():
             pyunits.get_units(m.fs.costing.total_operating_cost))
         print('Electricity demand (MWh/year):',pyunits.convert(m.fs.costing.aggregate_flow_electricity,to_units=pyunits.MW*pyunits.h/pyunits.year)())
         print('Heat demand (MWh/year):',pyunits.convert(m.fs.costing.aggregate_flow_heat,to_units=pyunits.MW*pyunits.h/pyunits.year)())
+        print('\n')
+        print("LCOW:",m.fs.treatment.costing.LCOW(),pyunits.get_units(m.fs.treatment.costing.LCOW))
+        print("Treatment SEC (electricity) in kWh/m3:",m.fs.treatment.costing.aggregate_flow_electricity()/product_m3h())
+        print("Treatment SEC (heat) in kWh/m3:",m.fs.treatment.costing.aggregate_flow_heat()/product_m3h())
+        print("Treatment System recovery (%):", product_m3h()/feed_m3h()*100)
+        print("Treatment Capex ($M):",m.fs.treatment.costing.total_capital_cost()/1e6, 
+            pyunits.get_units(m.fs.treatment.costing.total_capital_cost))
+        print("Treatment Opex ($M/yr):",m.fs.treatment.costing.total_operating_cost()/1e6, 
+            pyunits.get_units(m.fs.treatment.costing.total_operating_cost))
+        print('Treatment Electricity demand (MWh/year):',pyunits.convert(m.fs.treatment.costing.aggregate_flow_electricity,to_units=pyunits.MW*pyunits.h/pyunits.year)())
+        print('Treatment Heat demand (MWh/year):',pyunits.convert(m.fs.treatment.costing.aggregate_flow_heat,to_units=pyunits.MW*pyunits.h/pyunits.year)())
 
     except:    
         print("LCOW:",m.fs.treatment.costing.LCOW(),pyunits.get_units(m.fs.treatment.costing.LCOW))
-        print("SEC (electricity) in kWh/m3:",m.fs.treatment.costing.aggregate_flow_electricity()/product_m3h())
-        print("SEC (heat) in kWh/m3:",m.fs.treatment.costing.aggregate_flow_heat()/product_m3h())
-        print("System recovery (%):", product_m3h()/feed_m3h()*100)
-        print("Capex ($M):",m.fs.treatment.costing.total_capital_cost()/1e6, 
+        print("Treatment SEC (electricity) in kWh/m3:",m.fs.treatment.costing.aggregate_flow_electricity()/product_m3h())
+        print("Treatment SEC (heat) in kWh/m3:",m.fs.treatment.costing.aggregate_flow_heat()/product_m3h())
+        print("Treatment System recovery (%):", product_m3h()/feed_m3h()*100)
+        print("Treatment Capex ($M):",m.fs.treatment.costing.total_capital_cost()/1e6, 
             pyunits.get_units(m.fs.treatment.costing.total_capital_cost))
-        print("Opex ($M/yr):",m.fs.treatment.costing.total_operating_cost()/1e6, 
+        print("Treatment Opex ($M/yr):",m.fs.treatment.costing.total_operating_cost()/1e6, 
             pyunits.get_units(m.fs.treatment.costing.total_operating_cost))
-        print('Electricity demand (MWh/year):',pyunits.convert(m.fs.treatment.costing.aggregate_flow_electricity,to_units=pyunits.MW*pyunits.h/pyunits.year)())
-        print('Heat demand (MWh/year):',pyunits.convert(m.fs.treatment.costing.aggregate_flow_heat,to_units=pyunits.MW*pyunits.h/pyunits.year)())
+        print('Treatment Electricity demand (MWh/year):',pyunits.convert(m.fs.treatment.costing.aggregate_flow_electricity,to_units=pyunits.MW*pyunits.h/pyunits.year)())
+        print('Treatment Heat demand (MWh/year):',pyunits.convert(m.fs.treatment.costing.aggregate_flow_heat,to_units=pyunits.MW*pyunits.h/pyunits.year)())
 
     print_results(m)
+
+    print("\nFeed Basis Treatment SEC (heat) in kWh/m3:",m.fs.treatment.costing.aggregate_flow_heat()/feed_m3h())
+    print("Feed Basis Treatment SEC (electricity) in kWh/m3:",m.fs.treatment.costing.aggregate_flow_electricity()/feed_m3h())
+    
+    print('\nThermal SEC Breakdown')
+    print('VAGMD SEC (heat):',m.fs.treatment.md.unit.overall_thermal_power_requirement()/feed_m3h())
+    print('MEC SEC (heat):',m.fs.treatment.costing.SEC_th_component["fs.treatment.mec.unit.effects[1].effect"]())
+    
+    print('\nElectrical SEC Breakdown')
+    print('VAGMD SEC (electric):',m.fs.treatment.md.unit.overall_elec_power_requirement()/feed_m3h())
+    print('EC SEC (electric):',m.fs.treatment.costing.SEC_elec_component["fs.treatment.EC.unit"]())
+
+    mec_total_sec =  0
+    for key in m.fs.treatment.costing.SEC_elec_component.keys():
+        if "fs.treatment.mec.unit" in key:
+            mec_total_sec += m.fs.treatment.costing.SEC_elec_component[key]()
+
+    print('MEC SEC (electric):',mec_total_sec)
+
 
 if __name__ == "__main__":
 
