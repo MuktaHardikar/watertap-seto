@@ -1,4 +1,3 @@
-
 #################################################################################
 # WaterTAP Copyright (c) 2020-2025, The Regents of the University of California,
 # through Lawrence Berkeley National Laboratory, Oak Ridge National Laboratory,
