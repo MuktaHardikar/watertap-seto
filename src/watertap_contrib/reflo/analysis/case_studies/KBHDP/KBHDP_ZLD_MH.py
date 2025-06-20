@@ -85,7 +85,8 @@ def add_ro_recovery_constraint(m, blk,ro_recovery):
         expr=blk.feed.properties[0].flow_vol * m.fs.treatment.ro_water_recovery
         == blk.product.properties[0].flow_vol
     )
-    
+
+
 def build_zld_ro_treatment():
     m = ConcreteModel()
     m.db = REFLODatabase()
@@ -321,6 +322,7 @@ def set_zld_ro_operating_conditions(m, Qin,RO_pressure=20e5):
     treatment.pump.control_volume.properties_out[0].pressure.fix(RO_pressure)
     set_ro_system_operating_conditions(m, treatment.RO, mem_area=10000)
 
+
 def set_ec_scaling(m, blk, calc_blk_scaling_factors=False):
 
     set_scaling_factor(blk.ec.properties_in[0].flow_vol, 1e-2)
@@ -379,7 +381,7 @@ def init_zld_ro_treatment(m, verbose=True, solver=None):
 
     treatment.feed.initialize(optarg=optarg)
     propagate_state(treatment.feed_to_translator)
-    # report_MCAS_stream_conc(m, treatment.feed.properties[0.0])
+
     treatment.MCAS_to_TDS_translator.initialize(optarg=optarg)
     propagate_state(treatment.translator_to_EC)
 
@@ -698,6 +700,7 @@ def add_zld_cst(m):
     set_cst_op_conditions(m.fs.energy.cst, hours_storage=24)
     init_cst(m.fs.energy.cst)
 
+
 def add_zld_pv(m):
 
     build_pv(m)
@@ -705,7 +708,7 @@ def add_zld_pv(m):
     set_pv_constraints(m, focus="Size")
 
 
-def add_zld_treatment_costing(m,heat_price,electricity_price,nacl_recovery_price):
+def add_zld_treatment_costing(m,heat_price,electricity_price):
 
     # Add treatment costing
     treatment = m.fs.treatment
@@ -714,6 +717,8 @@ def add_zld_treatment_costing(m,heat_price,electricity_price,nacl_recovery_price
     treatment.pump.costing = UnitModelCostingBlock(
         flowsheet_costing_block=treatment.costing,
     )
+    m.fs.treatment.costing.heat_cost.fix(heat_price)
+    m.fs.treatment.costing.electricity_cost.fix(electricity_price)
 
     add_ec_costing(m, treatment.EC, treatment.costing)
     add_UF_costing(m, treatment.UF, treatment.costing)
@@ -843,20 +848,20 @@ def zld_main(
     print(f"\nDOF after MEC = {degrees_of_freedom(m)}")
     print("\n")
 
-    add_zld_treatment_costing(m,heat_price,electricity_price,nacl_recovery_price=nacl_recovery_price)
-    
-    try:
-        results = solve(m)
-        print(f"\nDOF after Costing = {degrees_of_freedom(m)}")
-        print("\n")
-    except:
-        print_infeasible_constraints(m)
-
-    # m.fs.treatment.costing.nacl_recovered.cost.set_value(nacl_recovery_price)
-    results = solve(m)
-
 
     if treatment_only == True:
+        add_zld_treatment_costing(m,heat_price,electricity_price)
+    
+        try:
+            results = solve(m)
+            print(f"\nDOF after Costing = {degrees_of_freedom(m)}")
+            print("\n")
+        except:
+            print_infeasible_constraints(m)
+
+        results = solve(m)
+
+        m.fs.treatment.costing.nacl_recovered.cost.set_value(nacl_recovery_price)
 
         # feed_density = 1000 * pyunits.kg / pyunits.m**3 
         feed_m3h = pyunits.convert(
@@ -880,11 +885,21 @@ def zld_main(
             pyunits.get_units(m.fs.treatment.costing.total_capital_cost))
         print("Opex ($M/yr):",m.fs.treatment.costing.total_operating_cost()/1e6, 
             pyunits.get_units(m.fs.treatment.costing.total_operating_cost))
-        print('Electricity demand (MWh/year):',pyunits.convert(m.fs.treatment.costing.aggregate_flow_electricity,to_units=pyunits.MW*pyunits.h/pyunits.year)())
-        print('Heat demand (MWh/year):',pyunits.convert(m.fs.treatment.costing.aggregate_flow_heat,to_units=pyunits.MW*pyunits.h/pyunits.year)())
+        # print('Electricity demand (MWh/year):',pyunits.convert(m.fs.treatment.costing.aggregate_flow_electricity,to_units=pyunits.MW*pyunits.h/pyunits.year)())
+        # print('Heat demand (MWh/year):',pyunits.convert(m.fs.treatment.costing.aggregate_flow_heat,to_units=pyunits.MW*pyunits.h/pyunits.year)())
 
     else:
 
+        add_zld_treatment_costing(m,heat_price=0,electricity_price=0)
+        try:
+            results = solve(m)
+            print(f"\nDOF after Costing = {degrees_of_freedom(m)}")
+            print("\n")
+        except:
+            print_infeasible_constraints(m)
+
+        results = solve(m)
+        
         # Calculate required heat load and CST sizing
         m.fs.energy = Block()
         m.fs.energy.costing = EnergyCosting()
@@ -1080,9 +1095,9 @@ if __name__ == "__main__":
         nacl_recovery_price = 0,
         heat_price = 0.00894,
         electricity_price = 0.04989,
-        grid_frac_heat = 0.5,
+        grid_frac_heat = 1,
         cost_per_total_aperture_area = 297,
-        cost_per_storage_capital = 93,
+        cost_per_storage_capital = 62,
         cost_per_watt_installed = 1.6
         )
     
