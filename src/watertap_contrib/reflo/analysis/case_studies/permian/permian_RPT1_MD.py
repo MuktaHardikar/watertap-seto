@@ -957,10 +957,10 @@ def main():
     electricity_price = 0.04346  # Updated 0.0575 in USD 2018 to USD 2023
 
     m = run_permian_rpt1_md(
-        Qin = 5, 
-        tds = 130, 
-        water_recovery = 0.5,   # Pretreatment + MD
-        grid_frac_heat = 0.5,
+        Qin = 9, 
+        tds = 200, 
+        water_recovery = 0.23,   # Pretreatment + MD
+        grid_frac_heat = 1,
         heat_price=heat_price, 
         electricity_price=electricity_price, 
         dwi_lcow  = 8.4,

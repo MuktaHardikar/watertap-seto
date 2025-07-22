@@ -85,7 +85,7 @@ if __name__ == "__main__":
     # Select sweep type
     #############################################################################################
     
-    sweep_type = "cst_cost_per_storage_capital"
+    sweep_type = "cst_cost_per_total_aperture_area"
     only_plot = False
     # only_plot = True
     

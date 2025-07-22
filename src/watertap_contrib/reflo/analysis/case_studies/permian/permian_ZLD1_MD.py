@@ -1095,10 +1095,10 @@ def main():
     electricity_price = 0.04346  # Updated 0.0575 in USD 2023 to USD 2018
 
     m = run_permian_zld1_md(
-                        Qin = 5, 
-                        tds = 130, 
-                        water_recovery = 0.5,   # Pretreatment + MD
-                        grid_frac_heat = 0.5,
+                        Qin = 9, 
+                        tds = 200, 
+                        water_recovery = 0.23,   # Pretreatment + MD
+                        grid_frac_heat = 1,
                         heat_price=heat_price, 
                         electricity_price=electricity_price, 
                         permian_cryst_config=permian_cryst_config,
