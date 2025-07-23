@@ -67,6 +67,26 @@ def main():
     add_costing(m)
     scale_costing(m)
     box_solve_problem(m)
+
+    # Adding SEC
+    feed_m3h = pyunits.convert(
+        m.fs.treatment.feed.properties[0].flow_vol, to_units=pyunits.m**3 / pyunits.h
+        )
+
+    m.fs.treatment.costing._add_flow_component_breakdowns(
+        "heat",
+        "SEC_th",
+        feed_m3h,
+        period=pyunits.hr 
+        )
+
+    m.fs.treatment.costing._add_flow_component_breakdowns(
+        "electricity",
+        "SEC_elec",
+        feed_m3h,
+        period=pyunits.hr 
+        )
+    
     solve(m, debug=False)
 
     optimize(
@@ -870,3 +890,6 @@ if __name__ == "__main__":
     file_dir = os.path.dirname(os.path.abspath(__file__))
     m = main()
     m.fs.costing.aggregate_flow_costs.display()
+
+    print('LTMED SEC (heat):',m.fs.treatment.costing.SEC_th_component["fs.treatment.LTMED.unit"]())
+    print('LTMED SEC (electricity):',m.fs.treatment.costing.SEC_elec_component["fs.treatment.LTMED.unit"]())
