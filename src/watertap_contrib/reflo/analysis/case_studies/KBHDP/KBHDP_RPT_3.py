@@ -185,6 +185,25 @@ def main(
     if dwi_lcow!= None:
         m.fs.treatment.costing.deep_well_injection.dwi_lcow.set_value(dwi_lcow)
 
+    # Adding SEC
+    feed_m3h = pyunits.convert(
+        m.fs.treatment.feed.properties[0].flow_vol, to_units=pyunits.m**3 / pyunits.h
+        )
+
+    m.fs.treatment.costing._add_flow_component_breakdowns(
+        "heat",
+        "SEC_th",
+        feed_m3h,
+        period=pyunits.hr 
+        )
+
+    m.fs.treatment.costing._add_flow_component_breakdowns(
+        "electricity",
+        "SEC_elec",
+        feed_m3h,
+        period=pyunits.hr 
+        )
+
     results = solve(m)
 
 
@@ -546,12 +565,13 @@ if __name__ == "__main__":
         water_recovery=0.8,
         heat_price = 0.00894,
         electricity_price=0.04989,
-        grid_frac_heat=0.15,
+        grid_frac_heat=0.5,
         hours_storage=24,
         cost_per_area_collector=600,
         cost_per_volume_storage=2000,
         dwi_lcow = 0.58
         )
+        
     # print_results_summary(m)
     
     # m = main_treatment(
@@ -581,3 +601,10 @@ if __name__ == "__main__":
     print('Electricity demand (MWh/year):',pyunits.convert(m.fs.treatment.costing.aggregate_flow_electricity,to_units=pyunits.MW*pyunits.h/pyunits.year)())
     print('Heat demand (MWh/year):',pyunits.convert(m.fs.treatment.costing.aggregate_flow_heat,to_units=pyunits.MW*pyunits.h/pyunits.year)())
 
+    print('\nThermal SEC Breakdown')
+    print('VAGMD SEC (heat):',m.fs.treatment.md.unit.overall_thermal_power_requirement()/feed_m3h())
+    
+    
+    print('\nElectrical SEC Breakdown')
+    print('VAGMD SEC (electric):',m.fs.treatment.md.unit.overall_elec_power_requirement()/feed_m3h())
+    
