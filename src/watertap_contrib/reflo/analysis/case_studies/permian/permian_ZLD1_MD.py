@@ -833,19 +833,19 @@ def run_permian_zld1_md(permian_cryst_config, Qin=5, tds=130, grid_frac_heat = 0
         m.fs.treatment.feed.properties[0].flow_vol, to_units=pyunits.m**3 / pyunits.h
         )
 
-        m.fs.treatment.costing._add_flow_component_breakdowns(
-        "heat",
-        "SEC_th",
-        feed_m3h,
-        period=pyunits.hr 
-        )
+        # m.fs.treatment.costing._add_flow_component_breakdowns(
+        # "heat",
+        # "SEC_th",
+        # feed_m3h,
+        # period=pyunits.hr 
+        # )
 
-        m.fs.treatment.costing._add_flow_component_breakdowns(
-        "electricity",
-        "SEC_elec",
-        feed_m3h,
-        period=pyunits.hr 
-        )
+        # m.fs.treatment.costing._add_flow_component_breakdowns(
+        # "electricity",
+        # "SEC_elec",
+        # feed_m3h,
+        # period=pyunits.hr 
+        # )
 
         results = solve(m)
 
@@ -880,19 +880,19 @@ def run_permian_zld1_md(permian_cryst_config, Qin=5, tds=130, grid_frac_heat = 0
         m.fs.treatment.feed.properties[0].flow_vol, to_units=pyunits.m**3 / pyunits.h
     )
 
-        m.fs.treatment.costing._add_flow_component_breakdowns(
-        "heat",
-        "SEC_th",
-        feed_m3h,
-        period=pyunits.hr 
-        )
+        # m.fs.treatment.costing._add_flow_component_breakdowns(
+        # "heat",
+        # "SEC_th",
+        # feed_m3h,
+        # period=pyunits.hr 
+        # )
 
-        m.fs.treatment.costing._add_flow_component_breakdowns(
-        "electricity",
-        "SEC_elec",
-        feed_m3h,
-        period=pyunits.hr 
-        )
+        # m.fs.treatment.costing._add_flow_component_breakdowns(
+        # "electricity",
+        # "SEC_elec",
+        # feed_m3h,
+        # period=pyunits.hr 
+        # )
 
         results = solve(m)
 
@@ -1095,10 +1095,10 @@ def main():
     electricity_price = 0.04346  # Updated 0.0575 in USD 2023 to USD 2018
 
     m = run_permian_zld1_md(
-                        Qin = 9, 
-                        tds = 200, 
-                        water_recovery = 0.23,   # Pretreatment + MD
-                        grid_frac_heat = 1,
+                        Qin = 5, 
+                        tds = 130, 
+                        water_recovery = 0.5,   # Pretreatment + MD
+                        grid_frac_heat = 0.5,
                         heat_price=heat_price, 
                         electricity_price=electricity_price, 
                         permian_cryst_config=permian_cryst_config,
@@ -1161,18 +1161,18 @@ def main():
     
     print('\nThermal SEC Breakdown')
     print('VAGMD SEC (heat):',m.fs.treatment.md.unit.overall_thermal_power_requirement()/feed_m3h())
-    print('MEC SEC (heat):',m.fs.treatment.costing.SEC_th_component["fs.treatment.mec.unit.effects[1].effect"]())
+    # print('MEC SEC (heat):',m.fs.treatment.costing.SEC_th_component["fs.treatment.mec.unit.effects[1].effect"]())
     
     print('\nElectrical SEC Breakdown')
     print('VAGMD SEC (electric):',m.fs.treatment.md.unit.overall_elec_power_requirement()/feed_m3h())
-    print('EC SEC (electric):',m.fs.treatment.costing.SEC_elec_component["fs.treatment.EC.unit"]())
+    # print('EC SEC (electric):',m.fs.treatment.costing.SEC_elec_component["fs.treatment.EC.unit"]())
 
-    mec_total_sec =  0
-    for key in m.fs.treatment.costing.SEC_elec_component.keys():
-        if "fs.treatment.mec.unit" in key:
-            mec_total_sec += m.fs.treatment.costing.SEC_elec_component[key]()
+    # mec_total_sec =  0
+    # for key in m.fs.treatment.costing.SEC_elec_component.keys():
+    #     if "fs.treatment.mec.unit" in key:
+    #         mec_total_sec += m.fs.treatment.costing.SEC_elec_component[key]()
 
-    print('MEC SEC (electric):',mec_total_sec)
+    # print('MEC SEC (electric):',mec_total_sec)
 
 
 if __name__ == "__main__":

@@ -59,13 +59,14 @@ if __name__ == "__main__":
     'cst_cost_per_total_aperture_area':np.linspace(148.5,445.5,5),
     'cst_cost_per_storage_capital':np.linspace(31,93,5),
     'nacl_recovery_price':[0,-0.012,-0.024],
+    'water_recovery':[0.5],
     }   
     
     input_dict = {
         'Qin': 5, 
         'tds': 130,
         'water_recovery':0.5,
-        'grid_frac_heat':0.5,
+        'grid_frac_heat':1,
         'heat_price':0.0166,
         "electricity_price":0.04346,
         'cst_cost_per_total_aperture_area':297,
@@ -85,7 +86,7 @@ if __name__ == "__main__":
     # Select sweep type
     #############################################################################################
     
-    sweep_type = "cst_cost_per_total_aperture_area"
+    sweep_type = "water_recovery"
     only_plot = False
     # only_plot = True
     
