@@ -4,7 +4,7 @@ import pandas as pd
 from watertap_contrib.reflo.analysis.case_studies.KBHDP.KBHDP_ZLD_MH import (
     zld_main,
 )
-
+from watertap_contrib.reflo.analysis.case_studies.KBHDP.KBHDP_ZLD_MH_Opt import zld_main as zld_main_opt
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -66,7 +66,7 @@ if __name__ == "__main__":
     'cst_cost_per_total_aperture_area':np.linspace(148.5,445.5,5),
     'cst_cost_per_storage_capital':np.linspace(31,93,5),
     'pv_cost_per_watt_installed':np.linspace(0.8,2.4,5),
-    'heat_price':np.linspace(0.00894,0.00894*1.5,5),
+    'heat_price':np.linspace(0.00894,0.0894,5),
     }   
     
     input_dict = {
@@ -76,8 +76,8 @@ if __name__ == "__main__":
         'heat_price':0.00894,
         'electricity_price':0.04989,
         'grid_frac_heat': 0.5,
-        'cst_cost_per_total_aperture_area': 297,
-        'cst_cost_per_storage_capital': 62,
+        'cst_cost_per_total_aperture_area': 297/2,
+        'cst_cost_per_storage_capital': 62/2,
         'pv_cost_per_watt_installed': 1.6
     }
 
@@ -136,7 +136,7 @@ if __name__ == "__main__":
  
     if only_plot==False:
         xcol = xcol_dict[sweep_type]
-        m = zld_main(
+        m = zld_main_opt(
                 ro_recovery= input_dict['ro_water_recovery'],
                 md_water_recovery= input_dict['md_water_recovery'],
                 nacl_recovery_price = input_dict['nacl_recovery_price'],
@@ -154,7 +154,7 @@ if __name__ == "__main__":
         for i in sweep_dict[sweep_type]:
             input_dict[sweep_type] = i
             print(input_dict)
-            m = zld_main(
+            m = zld_main_opt(
                 ro_recovery= input_dict['ro_water_recovery'],
                 md_water_recovery = input_dict['md_water_recovery'],
                 nacl_recovery_price = input_dict['nacl_recovery_price'],
@@ -170,13 +170,13 @@ if __name__ == "__main__":
 
 
         df = pd.DataFrame.from_dict(results_dict_test)
-        filename = "/Users/mhardika/Documents/watertap-seto/Mukta-Work/kbhdp-case-study-md/ZLD_sweep_results/kbhdp_ZLD_" + sweep_type + ".csv"
+        filename = "/Users/mhardika/Documents/watertap-seto/Mukta-Work/kbhdp-case-study-md/ZLD_sweep_results/kbhdp_ZLD_opt_" + sweep_type + ".csv"
         df.to_csv(filename)
         # df_T= pd.DataFrame.from_dict(results_dict_test, orient='index')
         # df_T.to_csv("/Users/mhardika/Documents/watertap-seto/Mukta-Work/kbhdp-case-study-md/RPT3_sweep_results//"+sweep_type+ "_T.csv")
 
 
-    filename = "/Users/mhardika/Documents/watertap-seto/Mukta-Work/kbhdp-case-study-md/ZLD_sweep_results/kbhdp_ZLD_"+ sweep_type + ".csv" 
+    filename = "/Users/mhardika/Documents/watertap-seto/Mukta-Work/kbhdp-case-study-md/ZLD_sweep_results/kbhdp_ZLD_opt_"+ sweep_type + ".csv" 
     # filename = "/Users/mhardika/Documents/watertap-seto/Mukta-Work/kbhdp-case-study-md/RPT3_sweep_results//"+ sweep_type + ".csv" 
     df = pd.read_csv(filename).drop(columns="Unnamed: 0")
     plot_case_study(df, xcol=xcol_dict[sweep_type],ax_dict=ax_dict[sweep_type])
