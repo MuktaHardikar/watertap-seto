@@ -4,6 +4,7 @@ import pandas as pd
 from watertap_contrib.reflo.analysis.case_studies.permian.permian_ZLD1_MD import (
     run_permian_zld1_md,
 )
+from watertap_contrib.reflo.analysis.case_studies.permian.permian_ZLD1_MD_Opt import run_permian_zld1_md as run_permian_zld1_md_opt
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -14,7 +15,9 @@ from watertap_contrib.reflo.analysis.case_studies.permian.utils.permian_MD_sweep
 
 def plot_case_study(df,xcol,ax_dict):
 
+    # xcol = "fs.water_recovery"
     flow_col = "fs.treatment.product.properties[0.0].flow_vol_phase[Liq]"
+    # df = df[df["fs.water_recovery"] == 0.8].copy()
 
     unit_dict = {
         "H2O2 Addition": "fs.treatment.chem_addition.unit.costing",
@@ -29,6 +32,7 @@ def plot_case_study(df,xcol,ax_dict):
         "Heat":"heat",
         "H2O2":"hydrogen_peroxide",
         "Aluminum":"aluminum",
+        # "Steam":"steam"
     }
 
     ax_dict = dict(xlabel=ax_dict, ylabel="LCOW (\$/m$^3$)")
@@ -51,7 +55,7 @@ def plot_case_study(df,xcol,ax_dict):
 if __name__ == "__main__":
 
     sweep_dict = {
-    'heat_price':np.linspace(0.0083,0.0249,5),      # $/kwh
+    'heat_price':np.linspace(0.0166,0.166,7),      # $/kwh
     'grid_frac_heat':np.linspace(0.5,0.9,5),
     'cst_cost_per_total_aperture_area':np.linspace(148.5,445.5,5),
     'cst_cost_per_storage_capital':np.linspace(31,93,5),
@@ -66,8 +70,8 @@ if __name__ == "__main__":
         'grid_frac_heat':0.5,
         'heat_price':0.0166,
         "electricity_price":0.04346,
-        'cst_cost_per_total_aperture_area':297,
-        'cst_cost_per_storage_capital': 62,
+        'cst_cost_per_total_aperture_area':297/2,
+        'cst_cost_per_storage_capital': 62/2,
         'cost_per_land_area':4000,
         'nacl_recovery_price':0,
     }
@@ -132,7 +136,7 @@ if __name__ == "__main__":
  
     if only_plot==False:
         xcol = xcol_dict[sweep_type]
-        m = run_permian_zld1_md(
+        m = run_permian_zld1_md_opt(
                 Qin=input_dict['Qin'], 
                 tds=input_dict['tds'], 
                 grid_frac_heat=input_dict['grid_frac_heat'],
@@ -152,7 +156,7 @@ if __name__ == "__main__":
         for i in sweep_dict[sweep_type]:
             input_dict[sweep_type] = i
             print(input_dict)
-            m = run_permian_zld1_md(
+            m = run_permian_zld1_md_opt(
                 Qin=input_dict['Qin'], 
                 tds=input_dict['tds'], 
                 grid_frac_heat=input_dict['grid_frac_heat'],
@@ -180,10 +184,8 @@ if __name__ == "__main__":
         else:
             rec_var = "var"
 
-        filename = "/Users/mhardika/Documents/watertap-seto/Mukta-Work/permian-case-study-md/ST2_MD_sweep_results//permian_ZLD1_MD_"+ sweep_type + "_grid_frac_" + grid_frac_var + "_recovery_" + rec_var + ".csv"
+        filename = "/Users/mhardika/Documents/watertap-seto/Mukta-Work/permian-case-study-md/ST2_MD_sweep_results//permian_ZLD1_MD_opt_heat_price.csv"
         df.to_csv(filename)
-        # df_T= pd.DataFrame.from_dict(results_dict_test, orient='index')
-        # df_T.to_csv("/Users/mhardika/Documents/watertap-seto/Mukta-Work//permian-case-study-md/ST1_MD_sweep_results//"+"grid_frac_heat_0.5"+ "_T.csv")
 
     if sweep_type != "grid_frac_heat":
             grid_frac_var = str(input_dict["grid_frac_heat"])
@@ -195,6 +197,6 @@ if __name__ == "__main__":
     else:
         rec_var = "var"
 
-    filename = "/Users/mhardika/Documents/watertap-seto/Mukta-Work//permian-case-study-md/ST2_MD_sweep_results//permian_ZLD1_MD_"+sweep_type + "_grid_frac_" + grid_frac_var + "_recovery_" + rec_var + ".csv"
+    filename = "/Users/mhardika/Documents/watertap-seto/Mukta-Work/permian-case-study-md/ST2_MD_sweep_results//permian_ZLD1_MD_opt_heat_price.csv"
     df = pd.read_csv(filename).drop(columns="Unnamed: 0")
     plot_case_study(df, xcol=xcol_dict[sweep_type],ax_dict=ax_dict[sweep_type])
