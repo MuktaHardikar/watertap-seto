@@ -4,6 +4,7 @@ import pandas as pd
 from watertap_contrib.reflo.analysis.case_studies.KBHDP.KBHDP_ZLD_MH import (
     zld_main,
 )
+from watertap_contrib.reflo.analysis.case_studies.KBHDP.KBHDP_ZLD_MH_Opt import zld_main as zld_main_opt
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -65,6 +66,7 @@ if __name__ == "__main__":
     'cst_cost_per_total_aperture_area':np.linspace(148.5,445.5,5),
     'cst_cost_per_storage_capital':np.linspace(31,93,5),
     'pv_cost_per_watt_installed':np.linspace(0.8,2.4,5),
+    'heat_price':np.linspace(0.00894,0.0894,5),
     }   
     
     input_dict = {
@@ -84,9 +86,9 @@ if __name__ == "__main__":
     # Select sweep type
     #############################################################################################
     
-    sweep_type = "grid_frac_heat"
+    sweep_type = "heat_price"
     only_plot = False
-    # only_plot = True
+    only_plot = True
 
     xcol_dict = {
         "ro_water_recovery":"fs.treatment.ro_water_recovery",
@@ -95,7 +97,8 @@ if __name__ == "__main__":
         'cst_cost_per_total_aperture_area':'fs.energy.costing.trough_surrogate.cost_per_total_aperture_area',
         'cst_cost_per_storage_capital':'fs.energy.costing.trough_surrogate.cost_per_storage_capital',
         'pv_cost_per_watt_installed':'fs.energy.costing.pv_surrogate.cost_per_watt_installed',
-        'grid_frac_heat':'fs.costing.frac_elec_from_grid'
+        'grid_frac_heat':'fs.costing.frac_elec_from_grid',
+        'heat_price':'fs.costing.heat_cost_buy'
     }
 
     ax_dict = {
@@ -105,7 +108,8 @@ if __name__ == "__main__":
         'cst_cost_per_total_aperture_area':"Cost per Total Aperture Area ($/m2)",
         'cst_cost_per_storage_capital':"Cost per Thermal Storage Capacity ($/kWh)",
         'pv_cost_per_watt_installed':"Cost per Watt Installed ($/W)",
-        'grid_frac_heat':'Grid Fraction'
+        'grid_frac_heat':'Grid Fraction',
+        'heat_price':'Heat Price ($/kWh)'
     }
 
 
@@ -132,7 +136,7 @@ if __name__ == "__main__":
  
     if only_plot==False:
         xcol = xcol_dict[sweep_type]
-        m = zld_main(
+        m = zld_main_opt(
                 ro_recovery= input_dict['ro_water_recovery'],
                 md_water_recovery= input_dict['md_water_recovery'],
                 nacl_recovery_price = input_dict['nacl_recovery_price'],
@@ -150,7 +154,7 @@ if __name__ == "__main__":
         for i in sweep_dict[sweep_type]:
             input_dict[sweep_type] = i
             print(input_dict)
-            m = zld_main(
+            m = zld_main_opt(
                 ro_recovery= input_dict['ro_water_recovery'],
                 md_water_recovery = input_dict['md_water_recovery'],
                 nacl_recovery_price = input_dict['nacl_recovery_price'],
