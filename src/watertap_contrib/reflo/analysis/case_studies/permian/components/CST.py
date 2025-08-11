@@ -68,7 +68,7 @@ def build_cst(blk, __file__=None):
 
     dataset_filename = os.path.join(
         os.path.dirname(__file__),
-        r"trough_permian_heat_load_1_200_hours_storage_24_T_loop_out_300.pkl",
+        r"trough_permian_heat_load_1_400_hours_storage_24_T_loop_out_300.pkl",
     )
 
     # Updating pickle file output column names
@@ -85,10 +85,10 @@ def build_cst(blk, __file__=None):
 
     surrogate_filename = os.path.join(
         os.path.dirname(__file__),
-        r"trough_permian_heat_load_1_200_hours_storage_24_T_loop_out_300.json",
+        r"trough_permian_heat_load_1_400_hours_storage_24_T_loop_out_300.json",
     )
 
-    input_bounds = dict(heat_load=[1, 200])  # , hours_storage=[23, 24])
+    input_bounds = dict(heat_load=[1, 400])  # , hours_storage=[23, 24])
     input_units = dict(heat_load="MW")  # , hours_storage="hour")
     input_variables = {
         "labels": ["heat_load"],  # "hours_storage"],

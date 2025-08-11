@@ -896,6 +896,10 @@ def run_permian_zld1_md(permian_cryst_config, Qin=5, tds=130, grid_frac_heat = 0
   
         results = solve(m)
 
+        m.fs.costing.frac_heat_from_grid.unfix()
+        m.fs.obj = Objective(expr=m.fs.costing.LCOT, sense="minimize")  
+        results = solve(m)
+
         print("\n--------- Costing solve with fixed grid fraction ---------\n")
 
         print('CST Heat load:', value(m.fs.energy.cst.unit.heat_load))
@@ -1091,7 +1095,7 @@ def main():
     "heat_transfer_coefficient": 1300
     }
 
-    heat_price = 0.0166*15
+    heat_price = 0.0166*6
     electricity_price = 0.04346  # Updated 0.0575 in USD 2023 to USD 2018
 
     m = run_permian_zld1_md(
@@ -1102,8 +1106,8 @@ def main():
                         heat_price=heat_price, 
                         electricity_price=electricity_price, 
                         permian_cryst_config=permian_cryst_config,
-                        cost_per_total_aperture_area = 297,
-                        cost_per_storage_capital= 62,
+                        cost_per_total_aperture_area = 297/2,
+                        cost_per_storage_capital= 62/2,
                         cost_per_land_area = 4000,
                         nacl_recovery_price = 0,
                         )
@@ -1177,6 +1181,13 @@ def main():
     print("\nGrid fraction heat:", m.fs.costing.frac_heat_from_grid())
     print("\nHeat price:", m.fs.costing.heat_cost_buy())
     print('CST Heat load:', value(m.fs.energy.cst.unit.heat_load))
+
+    lcoe= (
+        m.fs.energy.costing.total_capital_cost * m.fs.energy.costing.capital_recovery_factor
+        + m.fs.energy.costing.total_operating_cost
+    ) / m.fs.energy.cst.unit.heat_annual
+
+    print(f"LCOE: {lcoe()} {pyunits.get_units(lcoe)}")
 
 
 if __name__ == "__main__":
