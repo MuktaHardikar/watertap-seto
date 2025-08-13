@@ -55,7 +55,7 @@ def plot_case_study(df,xcol,ax_dict):
 if __name__ == "__main__":
 
     sweep_dict = {
-    'heat_price':np.linspace(0.0166,0.166,11),      # $/kwh
+    'heat_price':np.linspace(0.0166,0.166,21),      # $/kwh
     'grid_frac_heat':np.linspace(0.5,0.9,5),
     'cst_cost_per_total_aperture_area':np.linspace(148.5,445.5,5),
     'cst_cost_per_storage_capital':np.linspace(31,93,5),

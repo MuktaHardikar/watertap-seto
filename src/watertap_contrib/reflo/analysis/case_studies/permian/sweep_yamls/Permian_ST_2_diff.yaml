@@ -69,8 +69,8 @@ Permian_ST2_diff_analysis:
       diff_mode: percentile
       diff_sample_type: UniformSample
       param: fs.treatment.EC.unit.metal_dose
-      nominal_lb: 0.0005
-      nominal_ub: 0.0015
+      nominal_lb: 0.00005
+      nominal_ub: 0.00015
       relative_lb: -0.01
       relative_ub: -0.01
       group: Performance
@@ -138,8 +138,8 @@ Permian_ST2_diff_analysis:
       EC Metal Dose:
         type: UniformSample
         param: fs.treatment.EC.unit.metal_dose
-        lower_limit: 0.0005
-        upper_limit: 0.0015
+        lower_limit: 0.00005
+        upper_limit: 0.00015
       MD Membrane Cost:
         type: UniformSample
         param: fs.treatment.costing.vagmd_surrogate.membrane_cost
