@@ -242,13 +242,15 @@ def create_KBHDP():
 
 def create_Permian():
     # df1 = fetch_file(file = "diff_sweep_analysisType_Permian_ST1_diff_analysis.h5", yaml_file="Permian_ST_1_diff.yaml", case = "ST1")
-    df2 = fetch_file(file = "/Users/mhardika/Documents/watertap-seto/src/watertap_contrib/reflo/analysis/case_studies/permian/sweep_results/output/diff_sweep_analysisType_Permian_ST2_diff_analysis.h5", yaml_file="Permian_ST_2_diff.yaml", case = "ST2")
     # df2 = fetch_file(file = "diff_sweep_analysisType_RPT2_diff_analysis.h5", yaml_file="KBHDP_RPT_2_diff.yaml", case = "RPT2")
     # df3 = fetch_file(file = "diff_sweep_analysisType_RPT3_diff_analysis.h5", yaml_file="KBHDP_RPT_3_diff.yaml", case = "RPT3")
     # df4 = fetch_file(file = "diff_sweep_analysisType_RPT1_diff_analysis.h5", yaml_file="KBHDP_RPT_1_diff.yaml", case = "ZLD")
     # df = pd.concat([df1])
-    df = pd.concat([df2])
-    # df = pd.concat([df1, df2, df3, df4])
+    df1 = fetch_file(file = "/Users/mhardika/Documents/watertap-seto/src/watertap_contrib/reflo/analysis/case_studies/permian/sweep_results/output/diff_sweep_analysisType_kbhdp_zld_diff_analysis.h5", yaml_file="KBHDP_ZLD_diff.yaml", case = "KBHDP-ZLD")
+    df2 = fetch_file(file = "/Users/mhardika/Documents/watertap-seto/src/watertap_contrib/reflo/analysis/case_studies/permian/sweep_results/output/diff_sweep_analysisType_Permian_ST2_diff_analysis.h5", yaml_file="Permian_ST_2_diff.yaml", case = "P-ZLD1")
+    df3 = fetch_file(file = "/Users/mhardika/Documents/watertap-seto/src/watertap_contrib/reflo/analysis/case_studies/permian/sweep_results/output/diff_sweep_analysisType_permiain_zld2_diff_analysis.h5", yaml_file="permian_fo_cryst_RPT_diff.yaml", case = "P-ZLD2")
+    # df = pd.concat([df2])
+    df = pd.concat([df1, df2, df3])
     # df = df3
     df = df.sort_values(by=['Group', 'Case', 'Sweep'])
 
